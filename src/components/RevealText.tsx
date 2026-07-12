@@ -81,16 +81,18 @@ export default function RevealText({
       aria-label={text}
     >
       {units.map((unit, i) => (
-        <span
-          key={`${unit}-${i}`}
-          aria-hidden
-          className="inline-block overflow-hidden align-bottom"
-          style={{ paddingBottom: "0.08em", marginBottom: "-0.08em" }}
-        >
-          <motion.span variants={child} className="inline-block">
-            {unit}
-            {by === "word" && i < units.length - 1 ? " " : ""}
-          </motion.span>
+        <span key={`${unit}-${i}`} aria-hidden>
+          {/* The clip wraps ONLY the moving word; the space is a real,
+              unclipped space rendered between clips so words never merge. */}
+          <span
+            className="inline-block overflow-hidden align-bottom"
+            style={{ paddingBottom: "0.08em", marginBottom: "-0.08em" }}
+          >
+            <motion.span variants={child} className="inline-block">
+              {unit}
+            </motion.span>
+          </span>
+          {by === "word" && i < units.length - 1 ? " " : ""}
         </span>
       ))}
     </MotionTag>

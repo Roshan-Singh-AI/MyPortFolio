@@ -97,7 +97,7 @@ export default function Home() {
               <div className="flex flex-col gap-2">
                 <span className="kicker">Projects</span>
                 <h3 className="font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight">
-                  {projects.length} retrieval &amp; agent systems
+                  Retrieval &amp; agent systems
                 </h3>
                 <p className="text-sm text-text-dim">
                   GraphRAG, long-term agent memory, and cost-aware model routing
