@@ -41,7 +41,7 @@ export default function RevealText({
   id,
   animateOnMount = false,
   delay = 0,
-  stagger = 0.06,
+  stagger = 0.035,
 }: RevealTextProps) {
   const reduce = useReducedMotion();
   const units = by === "char" ? Array.from(text) : text.split(" ");
@@ -61,7 +61,7 @@ export default function RevealText({
     hidden: { y: "115%" },
     show: {
       y: "0%",
-      transition: { duration: 0.85, ease: EASE_OUT },
+      transition: { duration: 0.5, ease: EASE_OUT },
     },
   };
 

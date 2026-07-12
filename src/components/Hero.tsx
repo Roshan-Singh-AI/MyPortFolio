@@ -80,7 +80,7 @@ export default function Hero() {
         <motion.p
           initial={reduce ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: EASE_OUT, delay: 0.6 }}
+          transition={{ duration: 0.45, ease: EASE_OUT, delay: 0.35 }}
           className="mt-7 max-w-xl text-base leading-relaxed text-text-dim sm:text-lg"
         >
           {site.positioning}
@@ -89,20 +89,18 @@ export default function Hero() {
         <motion.div
           initial={reduce ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: EASE_OUT, delay: 0.72 }}
+          transition={{ duration: 0.45, ease: EASE_OUT, delay: 0.45 }}
           className="mt-9 flex flex-wrap items-center gap-3"
         >
-          <MagneticButton href="/projects">
+          <MagneticButton href="#ask-my-work">
+            Ask my work
+            <span
+              aria-hidden
+              className="ml-1 inline-flex h-2 w-2 rounded-full bg-white/90 shadow-[0_0_10px_2px_rgba(255,255,255,0.7)]"
+            />
+          </MagneticButton>
+          <MagneticButton href="/projects" variant="ghost">
             View projects
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <path
-                d="M5 12h14m-6-6 6 6-6 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
           </MagneticButton>
           <MagneticButton href="/work" variant="ghost">
             Experience
@@ -112,7 +110,7 @@ export default function Hero() {
         <motion.p
           initial={reduce ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.9 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
           className="kicker mt-10"
         >
           {site.location} &nbsp;/&nbsp; {site.relocation}
@@ -125,7 +123,7 @@ export default function Hero() {
           aria-hidden
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.1, duration: 0.8 }}
+          transition={{ delay: 0.75, duration: 0.5 }}
           className="absolute bottom-8 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-2 sm:flex"
         >
           <span className="kicker text-[0.6rem]">Scroll</span>
