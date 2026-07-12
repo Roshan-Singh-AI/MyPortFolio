@@ -2,13 +2,36 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { nav, site } from "@/content/site";
+import { useCommandPalette } from "./CommandPaletteProvider";
+
+/** Platform-aware modifier symbol. useSyncExternalStore keeps the server
+ *  snapshot ("Ctrl") stable through hydration, then swaps to the client value
+ *  -- no setState-in-effect, no hydration mismatch. */
+const NEVER = () => () => {};
+function useModifierKey(): string {
+  return useSyncExternalStore(
+    NEVER,
+    () => {
+      const p =
+        (typeof navigator !== "undefined" &&
+          ((navigator as Navigator & { userAgentData?: { platform?: string } })
+            .userAgentData?.platform ||
+            navigator.platform)) ||
+        "";
+      return /Mac|iPhone|iPad|iPod/i.test(p) ? "⌘" : "Ctrl";
+    },
+    () => "Ctrl",
+  );
+}
 
 export default function Nav() {
   const pathname = usePathname();
   const reduce = useReducedMotion();
+  const { openPalette } = useCommandPalette();
+  const modKey = useModifierKey();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -79,12 +102,55 @@ export default function Nav() {
           })}
         </nav>
 
-        <Link
-          href="/contact"
-          className="hidden rounded-full border border-line-strong bg-white/[0.02] px-4 py-2 text-sm text-text transition-colors hover:border-cyan/50 hover:bg-white/[0.06] md:inline-flex"
+        <div className="hidden items-center gap-2 md:flex">
+          {/* Discovery affordance for the global command palette */}
+          <button
+            type="button"
+            onClick={() => openPalette("ask")}
+            aria-haspopup="dialog"
+            className="group inline-flex items-center gap-2 rounded-full border border-line-strong bg-white/[0.02] py-2 pl-3 pr-2 text-sm text-text-dim transition-colors hover:border-cyan/50 hover:text-text"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+              className="text-cyan"
+            >
+              <path
+                d="M12 3l1.6 4.8L18 9.4l-4.4 1.6L12 16l-1.6-4.9L6 9.4l4.4-1.6L12 3z"
+                fill="currentColor"
+              />
+            </svg>
+            Ask AI
+            <kbd className="rounded border border-line bg-white/[0.04] px-1.5 py-0.5 font-[family-name:var(--font-mono)] text-[0.62rem] text-text-faint">
+              {modKey} K
+            </kbd>
+          </button>
+          <Link
+            href="/contact"
+            className="rounded-full border border-line-strong bg-white/[0.02] px-4 py-2 text-sm text-text transition-colors hover:border-cyan/50 hover:bg-white/[0.06]"
+          >
+            Let&apos;s talk
+          </Link>
+        </div>
+
+        {/* Mobile: quick ask + menu toggle */}
+        <button
+          type="button"
+          onClick={() => openPalette("ask")}
+          aria-haspopup="dialog"
+          aria-label="Ask the AI assistant"
+          className="relative mr-2 grid h-10 w-10 place-items-center rounded-full border border-line-strong bg-white/[0.02] md:hidden"
         >
-          Let&apos;s talk
-        </Link>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden className="text-cyan">
+            <path
+              d="M12 3l1.6 4.8L18 9.4l-4.4 1.6L12 16l-1.6-4.9L6 9.4l4.4-1.6L12 3z"
+              fill="currentColor"
+            />
+          </svg>
+        </button>
 
         {/* Mobile toggle */}
         <button

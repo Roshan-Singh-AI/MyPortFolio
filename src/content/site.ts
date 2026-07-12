@@ -261,3 +261,86 @@ export const awards: string[] = [
   "Bosch Rockstar Award",
   "Bosch Excellence Award",
 ];
+
+/* ------------------------------------------------------------------ */
+/*  "At a glance" -- the HR-scannable band on the home page.           */
+/*  Every value below is honest and traceable to the content above     */
+/*  (experience / projects / knowledge). No invented numbers.          */
+/* ------------------------------------------------------------------ */
+export type GlanceStat = {
+  /** The headline value -- kept short and scannable. */
+  value: string;
+  /** One-line context under the value. */
+  label: string;
+  /** Where this number honestly comes from (documented, not shown as UI). */
+  source: string;
+};
+
+export const glanceStats: GlanceStat[] = [
+  {
+    value: "~2.5 yrs",
+    label: "GenAI Engineer at Bosch",
+    source: "experience.duration + experience.role",
+  },
+  {
+    value: "Applied AI",
+    label: "Team shipping production LLM systems",
+    source: "experience.role -- Applied AI Team",
+  },
+  {
+    value: "3",
+    label: "Open-source AI systems on GitHub",
+    source: "projects[] -- GraphRAG, Agent Memory, Retrieval Router",
+  },
+  {
+    value: "~2M",
+    label: "Parts records classified (PoC, 4 countries)",
+    source: "experience.chapters -- parts-data classification",
+  },
+  {
+    value: "2x",
+    label: "Recognized -- Rockstar & Excellence",
+    source: "experience.recognition + awards",
+  },
+];
+
+/** Core skills surfaced as scannable chips in the glance band + palette. */
+export const coreSkills: string[] = [
+  "RAG",
+  "GraphRAG",
+  "Agents",
+  "MCP",
+  "LangGraph",
+  "Evaluation",
+  "Reranking",
+  "FastAPI",
+];
+
+/* ------------------------------------------------------------------ */
+/*  Command palette -- navigation targets + starter questions.        */
+/* ------------------------------------------------------------------ */
+export type CommandTarget = {
+  label: string;
+  href: string;
+  /** Extra searchable keywords for fuzzy matching. */
+  keywords: string;
+  /** Short hint shown on the right of the row. */
+  hint: string;
+};
+
+export const commandTargets: CommandTarget[] = [
+  { label: "Home", href: "/", keywords: "start intro landing", hint: "Page" },
+  { label: "Work", href: "/work", keywords: "experience bosch csai timeline career", hint: "Page" },
+  { label: "Projects", href: "/projects", keywords: "graphrag agent memory retrieval router github open source", hint: "Page" },
+  { label: "About", href: "/about", keywords: "bio background education recognition", hint: "Page" },
+  { label: "Contact", href: "/contact", keywords: "email hire reach linkedin github", hint: "Page" },
+  { label: "Ask my work", href: "/#ask-my-work", keywords: "rag demo agent retrieval ai chat question", hint: "Section" },
+];
+
+/** One-click starter questions offered in the palette's Ask mode. */
+export const askStarters: string[] = [
+  "What has Roshan built with agents?",
+  "How does he evaluate RAG?",
+  "Tell me about his GraphRAG work",
+  "Does he know MCP?",
+];

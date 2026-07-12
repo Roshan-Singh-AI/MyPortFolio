@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import SectionHeading from "@/components/SectionHeading";
-import ProjectCard from "@/components/ProjectCard";
+import ProjectsExplorer from "@/components/ProjectsExplorer";
 import { Reveal } from "@/components/RevealText";
 import MagneticButton from "@/components/MagneticButton";
 import { projects, site } from "@/content/site";
@@ -22,13 +22,11 @@ export default function ProjectsPage() {
       <SectionHeading
         kicker="Projects"
         title="Retrieval and agents, built to be measured."
-        intro="Three systems I designed and built end to end -- each with tests, benchmarks, and a working demo. Explore the code on GitHub."
+        intro="Three systems I designed and built end to end -- each with tests, benchmarks, and a working demo. Search semantically below, or explore the code on GitHub."
       />
 
-      <div className="mt-14 grid gap-4 lg:grid-cols-2">
-        {projects.map((project, i) => (
-          <ProjectCard key={project.slug} project={project} index={i} />
-        ))}
+      <div className="mt-14">
+        <ProjectsExplorer projects={projects} />
       </div>
 
       <Reveal delay={0.1}>

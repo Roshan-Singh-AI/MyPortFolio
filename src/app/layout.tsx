@@ -6,6 +6,8 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import CursorGlow from "@/components/CursorGlow";
 import PageTransition from "@/components/PageTransition";
+import CommandPaletteProvider from "@/components/CommandPaletteProvider";
+import AiLauncher from "@/components/AiLauncher";
 
 // Self-hosted Geist (variable) -- reliable offline builds + on Vercel.
 const geistSans = localFont({
@@ -86,14 +88,17 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <CursorGlow />
-        <Nav />
-        <PageTransition>
-          <main id="content" className="flex-1">
-            {children}
-          </main>
-        </PageTransition>
-        <Footer />
+        <CommandPaletteProvider>
+          <CursorGlow />
+          <Nav />
+          <PageTransition>
+            <main id="content" className="flex-1">
+              {children}
+            </main>
+          </PageTransition>
+          <Footer />
+          <AiLauncher />
+        </CommandPaletteProvider>
       </body>
     </html>
   );

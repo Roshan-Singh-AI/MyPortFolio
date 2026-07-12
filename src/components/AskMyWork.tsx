@@ -156,12 +156,16 @@ function RetrievalGraph({
     return { x: W - 40, y: 26 + t * (H - 52), c };
   });
 
+  // Hover reveals the REAL source + score of the node under the cursor.
+  const [hover, setHover] = useState<number | null>(null);
+  const hovered = hover !== null ? nodes[hover] : null;
+
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
       className="h-[150px] w-full"
       role="img"
-      aria-label="Retrieval graph connecting the query to the matched knowledge chunks"
+      aria-label="Retrieval graph connecting the query to the matched knowledge chunks. Node size and edge weight encode real cosine similarity."
     >
       <defs>
         <linearGradient id="amw-edge" x1="0" y1="0" x2="1" y2="0">
@@ -170,10 +174,11 @@ function RetrievalGraph({
         </linearGradient>
       </defs>
 
-      {/* edges query -> chunk, weighted by similarity */}
+      {/* edges query -> chunk, weighted by REAL similarity */}
       {nodes.map(({ x, y, c }, i) => {
         const rel = c.score / maxScore;
         const mx = (qx + x) / 2;
+        const isHover = hover === i;
         return (
           <motion.path
             key={`e-${c.id}`}
@@ -181,7 +186,7 @@ function RetrievalGraph({
             fill="none"
             stroke="url(#amw-edge)"
             strokeWidth={0.6 + rel * 2.4}
-            strokeOpacity={0.18 + rel * 0.55}
+            strokeOpacity={isHover ? 0.95 : 0.18 + rel * 0.55}
             initial={reduce ? false : { pathLength: 0, opacity: 0 }}
             animate={{ pathLength: 1, opacity: 1 }}
             transition={{ duration: reduce ? 0 : 0.6, ease: EASE_OUT, delay: reduce ? 0 : i * 0.1 }}
@@ -189,7 +194,8 @@ function RetrievalGraph({
         );
       })}
 
-      {/* chunk nodes -- brighter + larger the higher they scored */}
+      {/* chunk nodes -- brighter + larger the higher they REALLY scored.
+          Each node is hoverable and carries its real source + score. */}
       {nodes.map(({ x, y, c }, i) => {
         const rel = c.score / maxScore;
         const r = 3 + rel * 4;
@@ -199,8 +205,16 @@ function RetrievalGraph({
             initial={reduce ? false : { scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: reduce ? 0 : 0.4, ease: EASE_OUT, delay: reduce ? 0 : 0.1 + i * 0.1 }}
-            style={{ transformOrigin: `${x}px ${y}px` }}
+            style={{ transformOrigin: `${x}px ${y}px`, cursor: "pointer" }}
+            onMouseEnter={() => setHover(i)}
+            onMouseLeave={() => setHover((h) => (h === i ? null : h))}
+            onFocus={() => setHover(i)}
+            onBlur={() => setHover((h) => (h === i ? null : h))}
+            tabIndex={0}
+            role="listitem"
+            aria-label={`${c.source}, similarity ${c.score.toFixed(3)}`}
           >
+            <title>{`${c.source} -- similarity ${c.score.toFixed(3)}`}</title>
             {i === 0 && rel > 0 && !reduce && (
               <motion.circle
                 cx={x}
@@ -213,7 +227,15 @@ function RetrievalGraph({
                 transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
               />
             )}
-            <circle cx={x} cy={y} r={r} fill={i === 0 ? "#22d3ee" : "#a78bfa"} opacity={0.35 + rel * 0.55} />
+            {/* generous transparent hit area for easy hover/focus */}
+            <circle cx={x} cy={y} r={11} fill="transparent" />
+            <circle
+              cx={x}
+              cy={y}
+              r={hover === i ? r + 1.5 : r}
+              fill={i === 0 ? "#22d3ee" : "#a78bfa"}
+              opacity={hover === i ? 1 : 0.35 + rel * 0.55}
+            />
           </motion.g>
         );
       })}
@@ -230,6 +252,20 @@ function RetrievalGraph({
         fill="#6b6f82"
       >
         query
+      </text>
+
+      {/* Live readout of the hovered node's REAL source + score */}
+      <text
+        x={W - 40}
+        y={12}
+        textAnchor="end"
+        className="font-[family-name:var(--font-mono)]"
+        fontSize="8"
+        fill={hovered ? "#22d3ee" : "#6b6f82"}
+      >
+        {hovered
+          ? `${hovered.c.source} · ${hovered.c.score.toFixed(3)}`
+          : "hover a node"}
       </text>
     </svg>
   );

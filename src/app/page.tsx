@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Hero from "@/components/Hero";
+import AtAGlance from "@/components/AtAGlance";
 import GraphDivider from "@/components/GraphDivider";
 import SectionHeading from "@/components/SectionHeading";
 import { Reveal } from "@/components/RevealText";
@@ -11,6 +12,9 @@ export default function Home() {
   return (
     <>
       <Hero />
+
+      {/* HR-friendly "at a glance" band -- high on the page, scannable */}
+      <AtAGlance />
 
       {/* What I do */}
       <section

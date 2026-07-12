@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import SectionHeading from "@/components/SectionHeading";
-import SkillChips from "@/components/SkillChips";
+import SkillMatcher from "@/components/SkillMatcher";
 import { Reveal } from "@/components/RevealText";
 import GraphDivider from "@/components/GraphDivider";
 import { awards, education, site, skillGroups } from "@/content/site";
@@ -94,9 +94,10 @@ export default function AboutPage() {
         <SectionHeading
           kicker="Toolkit"
           title="Skills, grouped by how I use them."
+          intro="Hiring for something specific? Paste a line from the job description and the skills re-rank by real semantic similarity."
         />
         <div className="mt-12 mb-8">
-          <SkillChips groups={skillGroups} />
+          <SkillMatcher groups={skillGroups} />
         </div>
       </div>
     </div>

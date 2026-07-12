@@ -10,11 +10,17 @@ import { EASE_OUT, viewportOnce } from "@/lib/motion";
 export default function ProjectCard({
   project,
   index,
+  matchPct = null,
 }: {
   project: Project;
   index: number;
+  /** When set (semantic search active), shows the real similarity match. */
+  matchPct?: number | null;
 }) {
   const reduce = useReducedMotion();
+  // Inside the semantic explorer (matchPct !== null) the parent handles layout
+  // motion, so the card skips its own scroll-reveal to avoid fighting reorder.
+  const inExplorer = matchPct !== null;
 
   function trackGlow(e: MouseEvent<HTMLElement>) {
     const el = e.currentTarget;
@@ -26,11 +32,11 @@ export default function ProjectCard({
   return (
     <motion.article
       onMouseMove={trackGlow}
-      initial={reduce ? false : { opacity: 0, y: 30 }}
-      whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
+      initial={reduce || inExplorer ? false : { opacity: 0, y: 30 }}
+      whileInView={reduce || inExplorer ? undefined : { opacity: 1, y: 0 }}
       viewport={viewportOnce}
       transition={{ duration: 0.7, ease: EASE_OUT, delay: (index % 2) * 0.08 }}
-      className="group relative overflow-hidden rounded-2xl border border-line bg-surface/40 p-6 transition-colors duration-500 hover:border-line-strong sm:p-8"
+      className="group relative h-full overflow-hidden rounded-2xl border border-line bg-surface/40 p-6 transition-colors duration-500 hover:border-line-strong sm:p-8"
     >
       {/* hover glow */}
       <div
@@ -44,8 +50,24 @@ export default function ProjectCard({
       <div className="relative flex flex-col gap-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1.5">
-            <span className="kicker">
-              {String(index + 1).padStart(2, "0")}
+            <span className="flex items-center gap-2.5">
+              <span className="kicker">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              {matchPct !== null && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan/40 bg-cyan/[0.08] px-2 py-0.5 font-[family-name:var(--font-mono)] text-[0.58rem] text-cyan">
+                  <span
+                    aria-hidden
+                    className="inline-block h-1 w-8 overflow-hidden rounded-full bg-white/10"
+                  >
+                    <span
+                      className="block h-full rounded-full bg-[linear-gradient(90deg,#22d3ee,#a78bfa)]"
+                      style={{ width: `${matchPct}%` }}
+                    />
+                  </span>
+                  {matchPct}% match
+                </span>
+              )}
             </span>
             <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight text-text sm:text-2xl">
               {project.name}
