@@ -54,6 +54,32 @@ Vercel is made by the Next.js team; it's the easiest, free host for this.
 
 Every future `git push` auto-redeploys.
 
+### Turn on the live Groq answers (optional but recommended)
+
+The "Ask my work" demo works **with no setup** — without a key it serves a
+retrieval-grounded answer (still shows the whole pipeline). To make it generate
+answers with a real LLM:
+
+1. In Vercel → your project → **Settings → Environment Variables**, add:
+   - `GROQ_API_KEY` = your key from [console.groq.com/keys](https://console.groq.com/keys)
+   - `GROQ_MODEL` = `llama-3.3-70b-versatile` (optional; this is the default)
+2. Redeploy (Vercel → Deployments → ⋯ → Redeploy).
+
+The key lives **only** on Vercel's server (used by the `/api/ask` serverless
+function) — it is never shipped to the browser, so it stays safe on a public
+site. If the key is ever missing or Groq is unreachable, the demo automatically
+falls back to the offline retrieval answer, so it never breaks.
+
+> **Local dev:** copy `.env.example` to `.env.local` and put your key there
+> (`.env.local` is gitignored). Behind a corporate proxy, also set
+> `HTTPS_PROXY=http://localhost:3128`. On Vercel no proxy is needed.
+
+### Optional: contact-form delivery
+The contact form always works (it offers a direct `mailto:` fallback). To also
+receive submissions at a webhook (Slack/Discord/Zapier), add
+`CONTACT_WEBHOOK_URL` in Vercel env vars. Without it, the form still succeeds and
+nudges the visitor to email you.
+
 ### Alternative: Netlify
 Also free. Import the repo at netlify.com; build command `next build`. Vercel is
 smoother for Next.js, so prefer it unless you already use Netlify.
