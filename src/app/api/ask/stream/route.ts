@@ -43,8 +43,8 @@ const DEFAULT_MODEL = "llama-3.3-70b-versatile";
 
 // Confidence thresholds for the "Grade context" agent step. Cosine scores from
 // this small corpus cluster low, so these are calibrated to it, not to 1.0.
-const CONFIDENCE_HIGH = 0.16;
-const CONFIDENCE_LOW = 0.06;
+const CONFIDENCE_HIGH = 0.14;
+const CONFIDENCE_LOW = 0.03;
 
 // Build the TF-IDF index once per server instance (module scope).
 const index = buildIndex(knowledge);
@@ -317,8 +317,11 @@ export async function POST(request: NextRequest): Promise<Response> {
         let note: string | undefined;
         let streamedAny = false;
 
-        // Try Groq streaming when we have a key AND a confident retrieval.
-        if (apiKey && !fallback.lowConfidence) {
+        // Try Groq streaming whenever we have a key AND at least one retrieved
+        // chunk. The LLM handles loosely-matched context well and is instructed
+        // to answer honestly if the context doesn't cover the question -- far
+        // better UX than dead-ending a reasonable question on a strict floor.
+        if (apiKey && scored.length > 0 && scored[0].score > 0) {
           try {
             for await (const tok of streamGroqTokens(
               question,

@@ -20,7 +20,7 @@ export type ComposedAnswer = {
 };
 
 /** Below this cosine similarity we treat retrieval as "no good match". */
-const CONFIDENCE_FLOOR = 0.06;
+const CONFIDENCE_FLOOR = 0.03;
 
 /** Pull the first 1-2 sentences from a chunk so answers stay tight. */
 function leadSentences(text: string, max = 2): string {
