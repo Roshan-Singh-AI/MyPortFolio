@@ -1,65 +1,138 @@
-import Image from "next/image";
+import Link from "next/link";
+import Hero from "@/components/Hero";
+import GraphDivider from "@/components/GraphDivider";
+import SectionHeading from "@/components/SectionHeading";
+import { Reveal } from "@/components/RevealText";
+import MagneticButton from "@/components/MagneticButton";
+import { capabilities, projects } from "@/content/site";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <>
+      <Hero />
+
+      {/* What I do */}
+      <section
+        className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32"
+        aria-labelledby="what-i-do"
+      >
+        <SectionHeading
+          id="what-i-do"
+          kicker="What I do"
+          title="Three things, done well."
+          intro="Not a generalist spreading thin -- a builder focused on the parts of an LLM system that decide whether it actually works in production."
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+
+        <div className="mt-14 grid gap-4 md:grid-cols-3">
+          {capabilities.map((cap, i) => (
+            <Reveal key={cap.title} delay={i * 0.08}>
+              <div className="group flex h-full flex-col gap-3 rounded-2xl border border-line bg-surface/40 p-6 transition-colors duration-500 hover:border-line-strong">
+                <span className="font-[family-name:var(--font-mono)] text-sm text-cyan">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h3 className="font-[family-name:var(--font-display)] text-lg font-semibold tracking-tight">
+                  {cap.title}
+                </h3>
+                <p className="text-sm leading-relaxed text-text-dim">
+                  {cap.body}
+                </p>
+              </div>
+            </Reveal>
+          ))}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      <GraphDivider />
+
+      {/* Featured highlights */}
+      <section
+        className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32"
+        aria-labelledby="featured"
+      >
+        <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+          <SectionHeading
+            id="featured"
+            kicker="Selected work"
+            title="Systems, not screenshots."
+            intro="A snapshot of what I have built and shipped -- explore the full story in Work and Projects."
+          />
         </div>
-      </main>
-    </div>
+
+        <div className="mt-14 grid gap-4 sm:grid-cols-2">
+          <Reveal>
+            <Link
+              href="/work"
+              className="group relative flex h-full min-h-[220px] flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface/40 p-7 transition-colors duration-500 hover:border-cyan/40"
+            >
+              <div className="flex flex-col gap-2">
+                <span className="kicker">Experience</span>
+                <h3 className="font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight">
+                  Bosch Global Software Technologies
+                </h3>
+                <p className="text-sm text-text-dim">
+                  GenAI Engineer on the Applied AI team -- from a two-person PoC
+                  to an org-wide app builder now in pilot.
+                </p>
+              </div>
+              <span className="mt-6 inline-flex items-center gap-2 text-sm text-cyan transition-transform duration-300 group-hover:translate-x-1">
+                Read the story
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+                  <path
+                    d="M5 12h14m-6-6 6 6-6 6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+            </Link>
+          </Reveal>
+
+          <Reveal delay={0.08}>
+            <Link
+              href="/projects"
+              className="group relative flex h-full min-h-[220px] flex-col justify-between overflow-hidden rounded-2xl border border-line bg-surface/40 p-7 transition-colors duration-500 hover:border-violet/40"
+            >
+              <div className="flex flex-col gap-2">
+                <span className="kicker">Projects</span>
+                <h3 className="font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight">
+                  {projects.length} retrieval &amp; agent systems
+                </h3>
+                <p className="text-sm text-text-dim">
+                  GraphRAG, long-term agent memory, and cost-aware model routing
+                  -- each open on GitHub.
+                </p>
+              </div>
+              <div className="mt-6 flex flex-wrap items-center gap-2">
+                {projects.map((p) => (
+                  <span
+                    key={p.slug}
+                    className="rounded-md border border-line bg-white/[0.02] px-2 py-1 font-[family-name:var(--font-mono)] text-[0.68rem] text-text-faint"
+                  >
+                    {p.name}
+                  </span>
+                ))}
+              </div>
+            </Link>
+          </Reveal>
+        </div>
+
+        <Reveal delay={0.16}>
+          <div className="mt-16 flex flex-col items-start justify-between gap-6 rounded-2xl border border-line bg-[linear-gradient(115deg,rgba(34,211,238,0.06),rgba(167,139,250,0.06))] p-8 sm:flex-row sm:items-center sm:p-10">
+            <div>
+              <h3 className="font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight sm:text-3xl balance">
+                Building something that needs an AI engineer?
+              </h3>
+              <p className="mt-2 max-w-lg text-sm text-text-dim">
+                I am open to roles and collaborations across LLM applications,
+                RAG, and agents.
+              </p>
+            </div>
+            <MagneticButton href="/contact">Get in touch</MagneticButton>
+          </div>
+        </Reveal>
+      </section>
+    </>
   );
 }
