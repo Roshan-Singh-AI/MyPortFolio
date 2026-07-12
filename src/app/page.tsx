@@ -4,6 +4,7 @@ import GraphDivider from "@/components/GraphDivider";
 import SectionHeading from "@/components/SectionHeading";
 import { Reveal } from "@/components/RevealText";
 import MagneticButton from "@/components/MagneticButton";
+import AskMyWork from "@/components/AskMyWork";
 import { capabilities, projects } from "@/content/site";
 
 export default function Home() {
@@ -40,6 +41,25 @@ export default function Home() {
             </Reveal>
           ))}
         </div>
+      </section>
+
+      <GraphDivider />
+
+      {/* Ask my work -- interactive RAG demo */}
+      <section
+        className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32"
+        aria-labelledby="ask-my-work"
+      >
+        <SectionHeading
+          id="ask-my-work"
+          kicker="Ask my work"
+          title="This page is a tiny RAG system."
+          intro="Ask a question below. It retrieves the most relevant facts about my work with TF-IDF + cosine similarity -- you can watch the chunks get scored -- then grounds a cited answer with Groq, falling back to a retrieval-only answer with no key. Same pattern I ship in production RAG, just small enough to see."
+        />
+
+        <Reveal>
+          <AskMyWork />
+        </Reveal>
       </section>
 
       <GraphDivider />

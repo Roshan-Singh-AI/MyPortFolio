@@ -79,12 +79,12 @@ export default function Nav() {
           })}
         </nav>
 
-        <a
-          href={`mailto:${site.email}`}
+        <Link
+          href="/contact"
           className="hidden rounded-full border border-line-strong bg-white/[0.02] px-4 py-2 text-sm text-text transition-colors hover:border-cyan/50 hover:bg-white/[0.06] md:inline-flex"
         >
           Let&apos;s talk
-        </a>
+        </Link>
 
         {/* Mobile toggle */}
         <button
@@ -140,12 +140,12 @@ export default function Nav() {
                 </Link>
               );
             })}
-            <a
-              href={`mailto:${site.email}`}
+            <Link
+              href="/contact"
               className="mt-1 flex items-center justify-center rounded-xl bg-[linear-gradient(115deg,#22d3ee,#a78bfa)] px-4 py-3 text-base font-medium text-[#08080c]"
             >
               Let&apos;s talk
-            </a>
+            </Link>
           </motion.nav>
         )}
       </AnimatePresence>

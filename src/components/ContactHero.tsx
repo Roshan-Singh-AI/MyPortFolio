@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import GraphBackground from "./GraphBackground";
 import RevealText from "./RevealText";
+import ContactForm from "./ContactForm";
 import { site } from "@/content/site";
 import { EASE_OUT } from "@/lib/motion";
 
@@ -31,7 +32,10 @@ export default function ContactHero() {
   const reduce = useReducedMotion();
 
   return (
-    <section className="relative flex min-h-[100svh] items-center overflow-hidden">
+    <section
+      id="contact"
+      className="relative flex min-h-[100svh] items-center overflow-hidden"
+    >
       <div aria-hidden className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-grid opacity-30" />
         <div className="absolute inset-0 opacity-70">
@@ -71,33 +75,16 @@ export default function ContactHero() {
           RAG, and agents. The fastest way to reach me is email.
         </motion.p>
 
-        <motion.a
+        <motion.div
           initial={reduce ? false : { opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: EASE_OUT, delay: 0.6 }}
-          href={`mailto:${site.email}`}
-          className="group mt-9 inline-flex items-center gap-3 rounded-full bg-[linear-gradient(115deg,#22d3ee,#a78bfa)] px-7 py-4 text-base font-medium text-[#08080c] transition-shadow duration-300 hover:shadow-[0_18px_50px_-12px_rgba(34,211,238,0.55)]"
+          className="mt-10 max-w-3xl"
         >
-          {site.email}
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden
-            className="transition-transform duration-300 group-hover:translate-x-1"
-          >
-            <path
-              d="M5 12h14m-6-6 6 6-6 6"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </motion.a>
+          <ContactForm />
+        </motion.div>
 
-        <div className="mt-14 grid max-w-3xl gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-2">
+        <div className="mt-10 grid max-w-3xl gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-2">
           {links.map((link, i) => (
             <motion.a
               key={link.label}
