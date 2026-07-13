@@ -111,4 +111,19 @@ export const knowledge: KnowledgeChunk[] = [
     source: "About",
     text: "Roshan has been recognized twice by Bosch, with the Rockstar and Excellence awards, for delivery speed and ownership. He holds a B.E. in Computer Science from Chandigarh University and is based in Pune, India, open to relocation to Bengaluru or Hyderabad.",
   },
+  {
+    id: "highlights",
+    source: "About",
+    text: "Career highlights: Roshan owns the UI agent in CSAI Hub (an org-wide app-builder now in pilot at Bosch), shipped a 4-country ~2M-record parts-data classification PoC that hit its target KPIs, built the RAG pipeline behind the enterprise assistant DocupediaAI, and open-sourced three AI systems: Multihop-GraphRAG, Agent Memory, and Smart Retrieval Router. His standout is CSAI Hub for scope and ownership; his most technically ambitious open-source work is Multihop-GraphRAG.",
+  },
+  {
+    id: "why-hire",
+    source: "About",
+    text: "What sets Roshan apart: he goes deep on the parts of GenAI that decide whether a system actually works in production -- retrieval quality, agents that recover from tool failures, and evaluation with real metrics. He ships fast, owns features end to end, tests his work (his open-source projects carry passing test suites), and thinks about cost and latency, not just accuracy.",
+  },
+  {
+    id: "tech-stack",
+    source: "About",
+    text: "Roshan's core stack: Python and TypeScript; RAG, GraphRAG, LangChain, LangGraph, MCP, ReAct and multi-agent patterns, reranking, embeddings and hybrid search; LLMs via Azure OpenAI (GPT-4o), Anthropic Claude, Groq (Llama) and Hugging Face; vector and graph stores FAISS, Pinecone, ChromaDB and Neo4j; FastAPI backends; evaluation with RAGAS and recall@k; tooling with Docker, LangSmith, pytest and uv.",
+  },
 ];
