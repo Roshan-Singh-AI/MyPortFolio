@@ -29,3 +29,7 @@ export const fadeItem: Variants = {
 
 /** Trigger scroll reveals early (10% visible) so content is never late. */
 export const viewportOnce = { once: true, amount: 0.1 } as const;
+
+/** For near-top sections: only reveal once ~1/3 is scrolled into view, so an
+ *  above-the-fold band does not auto-fire on load. */
+export const viewportReveal = { once: true, amount: 0.35 } as const;

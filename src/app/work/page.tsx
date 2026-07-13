@@ -49,7 +49,7 @@ export default function WorkPage() {
       <Timeline chapters={experience.chapters} />
 
       <Reveal>
-        <div className="mt-12 rounded-2xl border border-line bg-[linear-gradient(115deg,rgba(34,211,238,0.06),rgba(167,139,250,0.06))] p-8">
+        <div className="mt-12 rounded-2xl border border-line bg-[linear-gradient(115deg,rgba(127,183,154,0.07),rgba(224,207,160,0.06))] p-8">
           <span className="kicker">Recognition</span>
           <p className="mt-3 font-[family-name:var(--font-display)] text-xl font-medium leading-snug tracking-tight sm:text-2xl balance">
             {experience.recognition}

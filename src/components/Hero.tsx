@@ -1,15 +1,16 @@
 "use client";
 
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import GraphBackground from "./GraphBackground";
 import RevealText from "./RevealText";
 import MagneticButton from "./MagneticButton";
 import { site } from "@/content/site";
 import { EASE_OUT } from "@/lib/motion";
+import { useMotionGate } from "@/lib/useMotionGate";
 
 export default function Hero() {
-  const reduce = useReducedMotion();
+  const { reduce } = useMotionGate();
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -33,12 +34,12 @@ export default function Hero() {
         style={reduce ? undefined : { y: graphY, opacity: graphOpacity }}
         className="absolute inset-0 z-0"
       >
-        <div className="absolute inset-0 bg-grid opacity-40" />
+        <div className="absolute inset-0 bg-grid opacity-50" />
         <div className="absolute inset-0">
           <GraphBackground density={26} variant="hero" />
         </div>
-        {/* readability vignette */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_45%,transparent,rgba(10,10,15,0.65))]" />
+        {/* readability vignette -- forest-tinted so the graph stays legible */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_68%_58%_at_50%_45%,transparent,rgba(16,21,15,0.5))]" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-bg to-transparent" />
       </motion.div>
 
@@ -53,8 +54,8 @@ export default function Hero() {
           className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-line bg-white/[0.03] px-4 py-1.5"
         >
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-gold" />
           </span>
           <span className="text-xs text-text-dim">
             Available for AI engineering roles
@@ -96,7 +97,7 @@ export default function Hero() {
             Ask my work
             <span
               aria-hidden
-              className="ml-1 inline-flex h-2 w-2 rounded-full bg-white/90 shadow-[0_0_10px_2px_rgba(255,255,255,0.7)]"
+              className="ml-1 inline-flex h-2 w-2 rounded-full bg-[#3a3009] shadow-[0_0_10px_2px_rgba(58,48,9,0.5)]"
             />
           </MagneticButton>
           <MagneticButton href="/projects" variant="ghost">

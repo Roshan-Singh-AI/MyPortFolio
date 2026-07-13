@@ -18,6 +18,13 @@ export default defineConfig({
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
     { name: "mobile", use: { ...devices["Pixel 7"] } },
+    {
+      name: "reduced-motion",
+      use: {
+        ...devices["Desktop Chrome"],
+        contextOptions: { reducedMotion: "reduce" },
+      },
+    },
   ],
   webServer: {
     // Assumes `npm run build` has already run; start the prod server.

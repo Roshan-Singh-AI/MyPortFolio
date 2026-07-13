@@ -287,12 +287,12 @@ export default function CommandPalette({
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.99 }}
             transition={{ duration: reduce ? 0 : 0.24, ease: EASE_OUT }}
             onKeyDown={onKeyDown}
-            className="relative z-10 flex w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-line-strong bg-[rgba(16,16,24,0.92)] shadow-[0_40px_120px_-30px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
+            className="relative z-10 flex w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-line-strong bg-[rgba(16,21,15,0.92)] shadow-[0_40px_120px_-30px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
           >
             {/* Accent top edge */}
             <span
               aria-hidden
-              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(34,211,238,0.6),rgba(167,139,250,0.6),transparent)]"
+              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(127,183,154,0.6),rgba(173,201,179,0.6),transparent)]"
             />
 
             {/* Mode toggle + input row */}

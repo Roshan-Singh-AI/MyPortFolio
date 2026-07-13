@@ -1,9 +1,10 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import type { ReactNode } from "react";
 import { EASE_OUT } from "@/lib/motion";
+import { useMotionGate } from "@/lib/useMotionGate";
 
 /**
  * Fades + lifts each route on navigation. `mode="wait"` avoids overlap,
@@ -11,9 +12,9 @@ import { EASE_OUT } from "@/lib/motion";
  */
 export default function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const reduce = useReducedMotion();
+  const { mounted, reduce } = useMotionGate();
 
-  if (reduce) return <>{children}</>;
+  if (reduce || !mounted) return <>{children}</>;
 
   return (
     <AnimatePresence mode="wait" initial={false}>

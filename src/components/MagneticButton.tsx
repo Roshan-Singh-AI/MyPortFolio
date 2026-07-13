@@ -23,8 +23,9 @@ const base =
   "group relative inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium tracking-tight transition-colors duration-300 focus-visible:outline-2";
 
 const variants = {
+  // Champagne/gold primary -- the one warm metallic, reserved for real CTAs.
   primary:
-    "text-[#08080c] bg-[linear-gradient(115deg,#22d3ee,#a78bfa)] hover:shadow-[0_18px_50px_-12px_rgba(34,211,238,0.55)]",
+    "text-[#241d09] bg-[linear-gradient(115deg,#e6d5ad,#d8c9a3,#cbb98a)] shadow-[0_1px_0_rgba(255,255,255,0.25)_inset] hover:shadow-[0_18px_50px_-12px_rgba(224,207,160,0.55)]",
   ghost:
     "text-text border border-line-strong bg-white/[0.02] hover:bg-white/[0.06] hover:border-cyan/50",
 } as const;

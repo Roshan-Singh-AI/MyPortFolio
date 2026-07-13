@@ -47,3 +47,5 @@ next-env.d.ts
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+# visual-QA screenshots are regenerated artifacts (~20MB), not source -- don't commit
+/tests/__shots__/

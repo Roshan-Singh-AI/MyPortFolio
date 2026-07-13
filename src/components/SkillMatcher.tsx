@@ -136,7 +136,7 @@ export default function SkillMatcher({ groups }: { groups: SkillGroup[] }) {
                   <span className="w-44 shrink-0 truncate text-sm text-text">{d.skill}</span>
                   <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.06]" role="presentation">
                     <motion.span
-                      className="block h-full rounded-full bg-[linear-gradient(90deg,#22d3ee,#a78bfa)]"
+                      className="block h-full rounded-full bg-[linear-gradient(90deg,#7fb79a,#adc9b3)]"
                       initial={reduce ? false : { width: 0 }}
                       animate={{ width: `${pct}%` }}
                       transition={{ duration: reduce ? 0 : 0.5, ease: EASE_OUT }}

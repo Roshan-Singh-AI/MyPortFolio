@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { EASE_OUT, viewportOnce } from "@/lib/motion";
+import { useMotionGate } from "@/lib/useMotionGate";
 import { createElement, type ReactNode } from "react";
 
 /** Tags this component can render as. Motion versions are declared once, at
@@ -43,7 +44,7 @@ export default function RevealText({
   delay = 0,
   stagger = 0.035,
 }: RevealTextProps) {
-  const reduce = useReducedMotion();
+  const { reduce } = useMotionGate();
   const units = by === "char" ? Array.from(text) : text.split(" ");
 
   if (reduce) {
@@ -109,7 +110,7 @@ export function Reveal({
   className?: string;
   delay?: number;
 }) {
-  const reduce = useReducedMotion();
+  const { reduce } = useMotionGate();
   if (reduce) return <div className={className}>{children}</div>;
 
   return (

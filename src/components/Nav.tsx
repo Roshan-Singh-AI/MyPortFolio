@@ -59,7 +59,7 @@ export default function Nav() {
       <div
         className={`mx-auto flex max-w-6xl items-center justify-between px-5 transition-all duration-500 sm:px-8 ${
           scrolled
-            ? "my-3 rounded-full border border-line bg-[rgba(10,10,15,0.72)] py-2.5 backdrop-blur-xl"
+            ? "my-3 rounded-full border border-line bg-[rgba(16,21,15,0.72)] py-2.5 backdrop-blur-xl"
             : "my-4 border border-transparent py-3"
         }`}
       >
@@ -69,7 +69,7 @@ export default function Nav() {
           aria-label={`${site.name} -- home`}
         >
           <span className="relative grid h-8 w-8 place-items-center rounded-lg border border-line-strong bg-white/[0.03]">
-            <span className="h-2 w-2 rounded-full bg-[linear-gradient(115deg,#22d3ee,#a78bfa)] shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
+            <span className="h-2 w-2 rounded-full bg-[linear-gradient(115deg,#7fb79a,#adc9b3)] shadow-[0_0_10px_rgba(127,183,154,0.8)]" />
           </span>
           <span className="font-[family-name:var(--font-display)]">
             Roshan<span className="text-cyan">.</span>
@@ -186,7 +186,7 @@ export default function Nav() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.25 }}
-            className="mx-4 mt-1 overflow-hidden rounded-2xl border border-line bg-[rgba(10,10,15,0.92)] p-2 backdrop-blur-xl md:hidden"
+            className="mx-4 mt-1 overflow-hidden rounded-2xl border border-line bg-[rgba(16,21,15,0.92)] p-2 backdrop-blur-xl md:hidden"
           >
             {nav.map((item) => {
               const active = isActive(item.href);
@@ -208,7 +208,7 @@ export default function Nav() {
             })}
             <Link
               href="/contact"
-              className="mt-1 flex items-center justify-center rounded-xl bg-[linear-gradient(115deg,#22d3ee,#a78bfa)] px-4 py-3 text-base font-medium text-[#08080c]"
+              className="mt-1 flex items-center justify-center rounded-xl bg-[linear-gradient(115deg,#7fb79a,#adc9b3)] px-4 py-3 text-base font-medium text-[#08080c]"
             >
               Let&apos;s talk
             </Link>

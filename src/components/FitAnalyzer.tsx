@@ -126,7 +126,7 @@ export default function FitAnalyzer() {
         className="pointer-events-none absolute inset-x-4 -top-8 -bottom-8 -z-10 rounded-[40px] blur-3xl"
         style={{
           background:
-            "radial-gradient(60% 60% at 30% 20%, rgba(34,211,238,0.18), transparent 70%), radial-gradient(55% 55% at 75% 80%, rgba(167,139,250,0.18), transparent 70%)",
+            "radial-gradient(60% 60% at 30% 20%, rgba(127,183,154,0.20), transparent 70%), radial-gradient(55% 55% at 75% 80%, rgba(173,201,179,0.18), transparent 70%)",
         }}
         animate={
           reduce
@@ -140,7 +140,7 @@ export default function FitAnalyzer() {
         }
       />
 
-      <div className="overflow-hidden rounded-3xl border border-line bg-[linear-gradient(160deg,rgba(34,211,238,0.04),rgba(167,139,250,0.05))] backdrop-blur-sm">
+      <div className="overflow-hidden rounded-3xl border border-line bg-[linear-gradient(160deg,rgba(127,183,154,0.05),rgba(173,201,179,0.05))] backdrop-blur-sm">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-6 py-4 sm:px-8">
           <div className="flex items-center gap-2.5">
@@ -194,7 +194,7 @@ export default function FitAnalyzer() {
               <button
                 type="submit"
                 disabled={Boolean(busy || jd.trim().length === 0)}
-                className="group inline-flex items-center gap-2 rounded-full bg-[linear-gradient(115deg,#22d3ee,#a78bfa)] px-6 py-3 text-sm font-medium text-[#08080c] transition-all duration-300 hover:shadow-[0_16px_44px_-12px_rgba(34,211,238,0.5)] disabled:cursor-not-allowed disabled:opacity-50"
+                className="group inline-flex items-center gap-2 rounded-full bg-[linear-gradient(115deg,#7fb79a,#adc9b3)] px-6 py-3 text-sm font-medium text-[#08080c] transition-all duration-300 hover:shadow-[0_16px_44px_-12px_rgba(127,183,154,0.5)] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {busy ? "Analyzing..." : "Analyze fit"}
                 {!busy && (

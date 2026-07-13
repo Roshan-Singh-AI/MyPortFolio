@@ -2,7 +2,7 @@
 
 A dark, editorial, animated portfolio built with **Next.js (App Router) + TypeScript + Tailwind + Framer Motion**. Five routes (home / work / projects / about / contact), a signature animated "retrieval graph" background (a nod to the GraphRAG + agent work), scroll-reveal typography, magnetic buttons, a cursor glow, and page transitions — all `prefers-reduced-motion` aware and responsive.
 
-Playwright-tested (24 tests, desktop + mobile): every route loads with **zero console errors**, nav works, the graph canvas renders, all projects + links are present, and the layout doesn't overflow.
+Playwright-tested across desktop, mobile, and reduced-motion projects: every route loads with **zero console errors and no hydration mismatch**, nav works, the graph canvas renders, all projects + links are present, the layout doesn't overflow, and above-the-fold content never flashes on load (per-frame opacity is asserted so intro animations only ever animate *in*).
 
 ## Run locally
 
@@ -28,11 +28,10 @@ npx playwright test
 All text lives in one typed file — **`src/content/site.ts`**. Edit that to change
 your bio, experience, projects, skills, or links. No need to touch components.
 
-- Two project GitHub links currently point to your profile
-  (`github.com/Roshan-Singh-AI`) as placeholders. After you push `agent-memory`
-  and `smart-retrieval-router`, update their `repo` URLs in `site.ts`.
+- Project GitHub links in `site.ts` point at the real repos
+  (`agent-memory`, `smart-retrieval-router`, `Multihop-GraphRAG`, ...).
 - `site.url` (also in `site.ts`) is set to `https://roshan-singh.vercel.app` for
-  metadata/sitemap. Change it to your real domain after deploying.
+  metadata/sitemap. Change it to your real Vercel/custom domain after deploying.
 
 ## Deploy free — Vercel (recommended, ~3 minutes)
 

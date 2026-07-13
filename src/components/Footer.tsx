@@ -4,7 +4,7 @@ import { nav, site } from "@/content/site";
 export default function Footer() {
   const year = new Date().getFullYear();
   return (
-    <footer className="relative mt-24 border-t border-line">
+    <footer className="relative mt-20 border-t border-line">
       <div className="mx-auto grid max-w-6xl gap-12 px-5 py-16 sm:px-8 md:grid-cols-[1.5fr_1fr_1fr]">
         <div className="flex flex-col gap-4">
           <span className="font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight">

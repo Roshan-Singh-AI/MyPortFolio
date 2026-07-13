@@ -71,7 +71,7 @@ export default function AboutPage() {
                   >
                     <span
                       aria-hidden
-                      className="h-1.5 w-1.5 rounded-full bg-[linear-gradient(115deg,#22d3ee,#a78bfa)]"
+                      className="h-1.5 w-1.5 rounded-full bg-[linear-gradient(115deg,#7fb79a,#adc9b3)]"
                     />
                     {a}
                   </li>

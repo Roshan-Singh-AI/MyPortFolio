@@ -54,9 +54,9 @@ type FetchState = "loading" | "ready" | "empty" | "error";
 
 /** Language dot colours -- a small, on-brand palette (no external data). */
 const LANG_COLOR: Record<string, string> = {
-  Python: "#7dd3fc",
-  TypeScript: "#22d3ee",
-  JavaScript: "#a78bfa",
+  Python: "#9ec9ac",
+  TypeScript: "#7fb79a",
+  JavaScript: "#adc9b3",
   Jupyter: "#f0abfc",
   "Jupyter Notebook": "#f0abfc",
   HTML: "#67e8f9",
@@ -432,7 +432,7 @@ export default function LiveFromGitHub() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={reduce ? undefined : { opacity: 0 }}
                 transition={{ duration: 0.4, ease: EASE_OUT }}
-                className="mt-6 overflow-hidden rounded-2xl border border-line bg-[linear-gradient(160deg,rgba(34,211,238,0.04),rgba(167,139,250,0.05))]"
+                className="mt-6 overflow-hidden rounded-2xl border border-line bg-[linear-gradient(160deg,rgba(127,183,154,0.05),rgba(173,201,179,0.05))]"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-3.5">
                   <div className="flex items-center gap-2.5">

@@ -63,7 +63,7 @@ function Blank({
         }`}
       >
         <motion.span
-          className="block h-px w-full origin-left bg-[linear-gradient(90deg,#22d3ee,#a78bfa)]"
+          className="block h-px w-full origin-left bg-[linear-gradient(90deg,#7fb79a,#adc9b3)]"
           initial={false}
           animate={{ scaleX: 0 }}
           variants={{ focus: { scaleX: 1 }, blur: { scaleX: 0 } }}
@@ -150,7 +150,7 @@ export default function ContactForm() {
   };
 
   return (
-    <div className="rounded-3xl border border-line bg-[linear-gradient(160deg,rgba(34,211,238,0.04),rgba(167,139,250,0.05))] p-6 sm:p-9">
+    <div className="rounded-3xl border border-line bg-[linear-gradient(160deg,rgba(127,183,154,0.05),rgba(173,201,179,0.05))] p-6 sm:p-9">
       <AnimatePresence mode="wait">
         {status === "success" ? (
           <motion.div
@@ -171,7 +171,7 @@ export default function ContactForm() {
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                 <motion.path
                   d="M5 13l4 4L19 7"
-                  stroke="#22d3ee"
+                  stroke="#7fb79a"
                   strokeWidth="2.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -192,7 +192,7 @@ export default function ContactForm() {
             <div className="mt-2 flex flex-wrap gap-3">
               <a
                 href={mailto()}
-                className="inline-flex items-center gap-2 rounded-full bg-[linear-gradient(115deg,#22d3ee,#a78bfa)] px-5 py-2.5 text-sm font-medium text-[#08080c]"
+                className="inline-flex items-center gap-2 rounded-full bg-[linear-gradient(115deg,#7fb79a,#adc9b3)] px-5 py-2.5 text-sm font-medium text-[#08080c]"
               >
                 Email me directly
               </a>
@@ -303,7 +303,7 @@ export default function ContactForm() {
               <button
                 type="submit"
                 disabled={status === "sending"}
-                className="group inline-flex items-center gap-2 rounded-full bg-[linear-gradient(115deg,#22d3ee,#a78bfa)] px-7 py-3.5 text-sm font-medium text-[#08080c] transition-all duration-300 hover:shadow-[0_16px_44px_-12px_rgba(34,211,238,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="group inline-flex items-center gap-2 rounded-full bg-[linear-gradient(115deg,#7fb79a,#adc9b3)] px-7 py-3.5 text-sm font-medium text-[#08080c] transition-all duration-300 hover:shadow-[0_16px_44px_-12px_rgba(127,183,154,0.5)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {status === "sending" ? "Sending..." : "Send message"}
                 {status !== "sending" && (

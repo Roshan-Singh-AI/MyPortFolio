@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useCommandPalette } from "./CommandPaletteProvider";
+import { useMotionGate } from "@/lib/useMotionGate";
 
 /**
  * Persistent floating AI assistant launcher, rendered on every page.
@@ -17,7 +18,7 @@ import { useCommandPalette } from "./CommandPaletteProvider";
  * page content (z-40) but below the open palette (z-90).
  */
 export default function AiLauncher() {
-  const reduce = useReducedMotion();
+  const { reduce } = useMotionGate();
   const { open, openPalette } = useCommandPalette();
 
   // Global keyboard shortcuts to open the palette from any page.
@@ -60,13 +61,13 @@ export default function AiLauncher() {
         style={{ pointerEvents: open ? "none" : "auto" }}
         whileHover={reduce ? undefined : { scale: 1.06 }}
         whileTap={reduce ? undefined : { scale: 0.94 }}
-        className="group relative grid h-14 w-14 place-items-center rounded-full border border-line-strong bg-[rgba(16,16,24,0.9)] backdrop-blur-xl"
+        className="group relative grid h-14 w-14 place-items-center rounded-full border border-line-strong bg-[rgba(16,21,15,0.9)] backdrop-blur-xl"
       >
         {/* Soft pulsing glow */}
         {!reduce && (
           <motion.span
             aria-hidden
-            className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.5),transparent_70%)] blur-md"
+            className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(127,183,154,0.5),transparent_70%)] blur-md"
             animate={{ opacity: [0.35, 0.7, 0.35], scale: [1, 1.15, 1] }}
             transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
           />
@@ -74,7 +75,7 @@ export default function AiLauncher() {
         {/* Gradient ring */}
         <span
           aria-hidden
-          className="absolute inset-0 rounded-full p-px [background:linear-gradient(135deg,rgba(34,211,238,0.7),rgba(167,139,250,0.7))] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"
+          className="absolute inset-0 rounded-full p-px [background:linear-gradient(135deg,rgba(127,183,154,0.7),rgba(173,201,179,0.7))] [mask:linear-gradient(#000_0_0)_content-box,linear-gradient(#000_0_0)] [mask-composite:exclude]"
         />
         {/* Spark / AI mark */}
         <span className="relative flex items-center gap-1">
@@ -93,7 +94,7 @@ export default function AiLauncher() {
             />
             <path
               d="M18.5 14.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7.7-2z"
-              fill="#a78bfa"
+              fill="#adc9b3"
               opacity="0.85"
             />
           </svg>

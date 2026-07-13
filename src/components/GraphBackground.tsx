@@ -47,9 +47,12 @@ export default function GraphBackground({
     if (!ctx) return;
 
     const NODE_COUNT = Math.min(variant === "divider" ? 12 : density, 34);
-    const LINK_DIST = variant === "divider" ? 150 : 190;
-    const CYAN = "34, 211, 238";
-    const VIOLET = "167, 139, 250";
+    const LINK_DIST = variant === "divider" ? 170 : 230;
+    // Forest-green palette: teal-sage nodes/edges with a pale-sage packet.
+    // rgb() of --accent-cyan (#7fb79a), --accent-violet (#adc9b3), #cfe0c9.
+    const CYAN = "127, 183, 154";
+    const VIOLET = "173, 201, 179";
+    const PACKET = "207, 224, 201";
 
     let width = 0;
     let height = 0;
@@ -66,7 +69,7 @@ export default function GraphBackground({
         y: Math.random() * height,
         vx: (Math.random() - 0.5) * 0.14,
         vy: (Math.random() - 0.5) * 0.14,
-        r: 1.4 + Math.random() * 2.4,
+        r: 1.8 + Math.random() * 2.6,
         pulse: Math.random() * Math.PI * 2,
         pulseSpeed: 0.008 + Math.random() * 0.014,
       }));
@@ -107,12 +110,12 @@ export default function GraphBackground({
         const dx = na.x - nb.x;
         const dy = na.y - nb.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const alpha = (1 - dist / LINK_DIST) * 0.5;
+        const alpha = (1 - dist / LINK_DIST) * 0.68;
         const grad = ctx!.createLinearGradient(na.x, na.y, nb.x, nb.y);
         grad.addColorStop(0, `rgba(${CYAN}, ${alpha})`);
         grad.addColorStop(1, `rgba(${VIOLET}, ${alpha})`);
         ctx!.strokeStyle = grad;
-        ctx!.lineWidth = 1;
+        ctx!.lineWidth = 1.15;
         ctx!.beginPath();
         ctx!.moveTo(na.x, na.y);
         ctx!.lineTo(nb.x, nb.y);
@@ -125,8 +128,8 @@ export default function GraphBackground({
           const px = na.x + (nb.x - na.x) * p;
           const py = na.y + (nb.y - na.y) * p;
           ctx!.beginPath();
-          ctx!.arc(px, py, 1.5, 0, Math.PI * 2);
-          ctx!.fillStyle = `rgba(125, 211, 252, ${alpha + 0.25})`;
+          ctx!.arc(px, py, 1.6, 0, Math.PI * 2);
+          ctx!.fillStyle = `rgba(${PACKET}, ${alpha + 0.3})`;
           ctx!.fill();
         }
       }
@@ -134,12 +137,12 @@ export default function GraphBackground({
       // nodes
       for (const n of nodes) {
         const pulse = animate ? (Math.sin(n.pulse) + 1) / 2 : 0.5;
-        const glow = 6 + pulse * 10;
+        const glow = 8 + pulse * 12;
         ctx!.beginPath();
         ctx!.arc(n.x, n.y, n.r + pulse * 1.2, 0, Math.PI * 2);
-        ctx!.fillStyle = `rgba(${CYAN}, ${0.55 + pulse * 0.35})`;
+        ctx!.fillStyle = `rgba(${CYAN}, ${0.7 + pulse * 0.3})`;
         ctx!.shadowBlur = glow;
-        ctx!.shadowColor = `rgba(${CYAN}, 0.7)`;
+        ctx!.shadowColor = `rgba(${CYAN}, 0.85)`;
         ctx!.fill();
         ctx!.shadowBlur = 0;
       }

@@ -289,8 +289,8 @@ function RetrievalGraph({
     >
       <defs>
         <linearGradient id="amw-edge" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#22d3ee" />
-          <stop offset="1" stopColor="#a78bfa" />
+          <stop offset="0" stopColor="#7fb79a" />
+          <stop offset="1" stopColor="#adc9b3" />
         </linearGradient>
       </defs>
 
@@ -341,7 +341,7 @@ function RetrievalGraph({
                 cy={y}
                 r={r}
                 fill="none"
-                stroke="#22d3ee"
+                stroke="#7fb79a"
                 strokeWidth={1}
                 animate={{ r: [r, r + 6], opacity: [0.6, 0] }}
                 transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
@@ -353,7 +353,7 @@ function RetrievalGraph({
               cx={x}
               cy={y}
               r={hover === i ? r + 1.5 : r}
-              fill={i === 0 ? "#22d3ee" : "#a78bfa"}
+              fill={i === 0 ? "#7fb79a" : "#adc9b3"}
               opacity={hover === i ? 1 : 0.35 + rel * 0.55}
             />
           </motion.g>
@@ -361,15 +361,15 @@ function RetrievalGraph({
       })}
 
       {/* query node */}
-      <circle cx={qx} cy={qy} r={5} fill="#7dd3fc" />
-      <circle cx={qx} cy={qy} r={9} fill="none" stroke="#7dd3fc" strokeWidth={1} strokeOpacity={0.4} />
+      <circle cx={qx} cy={qy} r={5} fill="#9ec9ac" />
+      <circle cx={qx} cy={qy} r={9} fill="none" stroke="#9ec9ac" strokeWidth={1} strokeOpacity={0.4} />
       <text
         x={qx}
         y={qy + 24}
         textAnchor="middle"
         className="font-[family-name:var(--font-mono)]"
         fontSize="8"
-        fill="#6b6f82"
+        fill="#7f907f"
       >
         query
       </text>
@@ -381,7 +381,7 @@ function RetrievalGraph({
         textAnchor="end"
         className="font-[family-name:var(--font-mono)]"
         fontSize="8"
-        fill={hovered ? "#22d3ee" : "#6b6f82"}
+        fill={hovered ? "#7fb79a" : "#7f907f"}
       >
         {hovered
           ? `${hovered.c.source} · ${hovered.c.score.toFixed(3)}`
@@ -645,7 +645,7 @@ export default function AskMyWork() {
         className="pointer-events-none absolute inset-x-4 -top-10 -bottom-8 -z-10 rounded-[40px] blur-3xl"
         style={{
           background:
-            "radial-gradient(60% 60% at 30% 20%, rgba(34,211,238,0.20), transparent 70%), radial-gradient(55% 55% at 75% 80%, rgba(167,139,250,0.20), transparent 70%)",
+            "radial-gradient(60% 60% at 30% 20%, rgba(127,183,154,0.22), transparent 70%), radial-gradient(55% 55% at 75% 80%, rgba(173,201,179,0.20), transparent 70%)",
         }}
         animate={
           reduce
@@ -659,7 +659,7 @@ export default function AskMyWork() {
         }
       />
 
-      <div className="overflow-hidden rounded-3xl border border-line bg-[linear-gradient(160deg,rgba(34,211,238,0.04),rgba(167,139,250,0.05))] backdrop-blur-sm">
+      <div className="overflow-hidden rounded-3xl border border-line bg-[linear-gradient(160deg,rgba(127,183,154,0.05),rgba(173,201,179,0.05))] backdrop-blur-sm">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-6 py-4 sm:px-8">
           <div className="flex items-center gap-2.5">
@@ -724,7 +724,7 @@ export default function AskMyWork() {
                 <button
                   type="submit"
                   disabled={Boolean(query.trim().length === 0)}
-                  className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[linear-gradient(115deg,#22d3ee,#a78bfa)] px-6 py-3.5 text-sm font-medium text-[#08080c] transition-all duration-300 hover:shadow-[0_14px_40px_-12px_rgba(34,211,238,0.5)] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[linear-gradient(115deg,#e6d5ad,#d8c9a3,#cbb98a)] px-6 py-3.5 text-sm font-medium text-[#241d09] transition-all duration-300 hover:shadow-[0_14px_40px_-12px_rgba(224,207,160,0.5)] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Ask
                   <svg
@@ -886,7 +886,7 @@ export default function AskMyWork() {
                                     {!reduce && (
                                       <motion.span
                                         aria-hidden
-                                        className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(34,211,238,0.35),transparent)]"
+                                        className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(127,183,154,0.35),transparent)]"
                                         animate={{ x: ["-100%", "200%"] }}
                                         transition={{ duration: 1.1, repeat: Infinity, ease: "linear" }}
                                       />
@@ -946,7 +946,7 @@ export default function AskMyWork() {
                                             aria-label={`${c.source} similarity ${pct} percent`}
                                           >
                                             <motion.div
-                                              className="h-full rounded-full bg-[linear-gradient(90deg,#22d3ee,#a78bfa)]"
+                                              className="h-full rounded-full bg-[linear-gradient(90deg,#7fb79a,#adc9b3)]"
                                               initial={reduce ? false : { width: 0 }}
                                               animate={{ width: `${pct}%` }}
                                               transition={{ duration: reduce ? 0 : 0.6, ease: EASE_OUT, delay: reduce ? 0 : i * 0.08 }}

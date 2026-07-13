@@ -1,9 +1,10 @@
 "use client";
 
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import type { Experience } from "@/content/site";
 import { EASE_OUT, viewportOnce } from "@/lib/motion";
+import { useMotionGate } from "@/lib/useMotionGate";
 
 type Chapter = Experience["chapters"][number];
 
@@ -12,7 +13,11 @@ type Chapter = Experience["chapters"][number];
  * with each chapter reading like a short story rather than resume bullets.
  */
 export default function Timeline({ chapters }: { chapters: Chapter[] }) {
-  const reduce = useReducedMotion();
+  // Gate on `mounted` (not raw useReducedMotion): the server + first client
+  // render both treat reduce=true, so the SSR HTML and the hydrated tree are
+  // byte-identical (no React #418 hydration mismatch). Motion elements that are
+  // structurally conditional on `!reduce` therefore appear only after mount.
+  const { reduce } = useMotionGate();
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -29,7 +34,7 @@ export default function Timeline({ chapters }: { chapters: Chapter[] }) {
       >
         {!reduce && (
           <motion.div
-            className="absolute inset-x-0 top-0 w-px bg-[linear-gradient(180deg,#22d3ee,#a78bfa)]"
+            className="absolute inset-x-0 top-0 w-px bg-[linear-gradient(180deg,#7fb79a,#adc9b3)]"
             style={{ height: fillHeight }}
           />
         )}

@@ -171,7 +171,7 @@ export const projects: Project[] = [
       "pytest",
       "uv",
     ],
-    link: "https://github.com/Roshan-Singh-AI",
+    link: "https://github.com/Roshan-Singh-AI/agent-memory",
     diagram: {
       nodes: ["Agent", "Tools", "Store", "Rank", "Recall"],
       caption: "Agent writes to memory via tools; recall ranks by relevance.",
@@ -186,8 +186,8 @@ export const projects: Project[] = [
     highlights: [
       "Second-stage reranker: lexical / cross-encoder / LLM",
       "Difficulty router: small model vs frontier",
-      "~45% lower inference cost vs always-frontier",
-      "Lifts nDCG while cutting cost",
+      "Cost model quantifies savings for a given traffic mix",
+      "Reranks candidates before the model",
       "30 passing tests",
     ],
     tech: [
@@ -199,7 +199,7 @@ export const projects: Project[] = [
       "nDCG",
       "Groq",
     ],
-    link: "https://github.com/Roshan-Singh-AI",
+    link: "https://github.com/Roshan-Singh-AI/smart-retrieval-router",
     diagram: {
       nodes: ["Query", "Rerank", "Route", "Small / Frontier", "Answer"],
       caption: "Rerank candidates, then route by difficulty to the right model.",

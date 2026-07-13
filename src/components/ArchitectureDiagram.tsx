@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { viewportOnce } from "@/lib/motion";
+import { useMotionGate } from "@/lib/useMotionGate";
 
 /**
  * A small animated architecture pipeline: labelled nodes connected by
@@ -15,7 +16,10 @@ export default function ArchitectureDiagram({
   nodes: string[];
   caption: string;
 }) {
-  const reduce = useReducedMotion();
+  // Gate on `mounted` (not raw useReducedMotion) so the SSR HTML matches the
+  // first client render -- the structurally-conditional {!reduce && ...} dot
+  // otherwise causes a React #418 hydration mismatch under reduced motion.
+  const { reduce } = useMotionGate();
   const count = nodes.length;
 
   return (
@@ -39,7 +43,7 @@ export default function ArchitectureDiagram({
               >
                 {!reduce && (
                   <motion.span
-                    className="absolute inset-y-0 left-0 w-2 bg-[linear-gradient(90deg,transparent,#22d3ee,transparent)]"
+                    className="absolute inset-y-0 left-0 w-2 bg-[linear-gradient(90deg,transparent,#7fb79a,transparent)]"
                     animate={{ x: ["-8px", "40px"] }}
                     transition={{
                       duration: 1.6,

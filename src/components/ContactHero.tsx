@@ -1,12 +1,13 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import GraphBackground from "./GraphBackground";
 import RevealText from "./RevealText";
 import ContactForm from "./ContactForm";
 import FitAnalyzer from "./FitAnalyzer";
 import { site } from "@/content/site";
 import { EASE_OUT } from "@/lib/motion";
+import { useMotionGate } from "@/lib/useMotionGate";
 
 const links = [
   { label: "Email", value: site.email, href: `mailto:${site.email}` },
@@ -30,7 +31,7 @@ const links = [
 ];
 
 export default function ContactHero() {
-  const reduce = useReducedMotion();
+  const { reduce } = useMotionGate();
 
   return (
     <section
@@ -42,7 +43,7 @@ export default function ContactHero() {
         <div className="absolute inset-0 opacity-70">
           <GraphBackground density={20} variant="hero" />
         </div>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_50%,transparent,rgba(10,10,15,0.7))]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_50%,transparent,rgba(16,21,15,0.7))]" />
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-6xl px-5 pt-36 pb-32 sm:px-8 sm:pt-44">

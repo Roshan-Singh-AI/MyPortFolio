@@ -44,7 +44,7 @@ export default function ProjectCard({
         className="pointer-events-none absolute -inset-px opacity-0 transition-opacity duration-500 group-hover:opacity-100"
         style={{
           background:
-            "radial-gradient(600px circle at var(--mx,50%) var(--my,0%), rgba(34,211,238,0.10), transparent 40%)",
+            "radial-gradient(600px circle at var(--mx,50%) var(--my,0%), rgba(127,183,154,0.12), transparent 40%)",
         }}
       />
       <div className="relative flex flex-col gap-5">
@@ -61,7 +61,7 @@ export default function ProjectCard({
                     className="inline-block h-1 w-8 overflow-hidden rounded-full bg-white/10"
                   >
                     <span
-                      className="block h-full rounded-full bg-[linear-gradient(90deg,#22d3ee,#a78bfa)]"
+                      className="block h-full rounded-full bg-[linear-gradient(90deg,#7fb79a,#adc9b3)]"
                       style={{ width: `${matchPct}%` }}
                     />
                   </span>

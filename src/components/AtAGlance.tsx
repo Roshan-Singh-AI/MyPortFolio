@@ -1,8 +1,9 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { glanceStats, coreSkills } from "@/content/site";
-import { EASE_OUT, viewportOnce } from "@/lib/motion";
+import { EASE_OUT, viewportReveal } from "@/lib/motion";
+import { useMotionGate } from "@/lib/useMotionGate";
 
 /**
  * "At a glance" -- the HR-scannable band, placed high on the home page so a
@@ -14,7 +15,7 @@ import { EASE_OUT, viewportOnce } from "@/lib/motion";
  * No invented figures -- every value maps to real content.
  */
 export default function AtAGlance() {
-  const reduce = useReducedMotion();
+  const { reduce } = useMotionGate();
 
   return (
     <section
@@ -26,14 +27,14 @@ export default function AtAGlance() {
       </h2>
 
       <motion.div
-        initial="hidden"
-        whileInView="show"
-        viewport={viewportOnce}
+        initial={reduce ? false : "hidden"}
+        whileInView={reduce ? undefined : "show"}
+        viewport={viewportReveal}
         variants={{
           hidden: {},
           show: { transition: { staggerChildren: reduce ? 0 : 0.06 } },
         }}
-        className="rounded-3xl border border-line bg-[linear-gradient(160deg,rgba(34,211,238,0.045),rgba(167,139,250,0.05))] p-5 backdrop-blur-sm sm:p-7"
+        className="rounded-3xl border border-line bg-[linear-gradient(160deg,rgba(127,183,154,0.06),rgba(173,201,179,0.05))] p-5 backdrop-blur-sm sm:p-7"
       >
         {/* Stat strip */}
         <ul className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-5">

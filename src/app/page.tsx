@@ -18,7 +18,7 @@ export default function Home() {
 
       {/* What I do */}
       <section
-        className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32"
+        className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20"
         aria-labelledby="what-i-do"
       >
         <SectionHeading
@@ -28,7 +28,7 @@ export default function Home() {
           intro="Not a generalist spreading thin -- a builder focused on the parts of an LLM system that decide whether it actually works in production."
         />
 
-        <div className="mt-14 grid gap-4 md:grid-cols-3">
+        <div className="mt-12 grid gap-4 md:grid-cols-3">
           {capabilities.map((cap, i) => (
             <Reveal key={cap.title} delay={i * 0.08}>
               <div className="group flex h-full flex-col gap-3 rounded-2xl border border-line bg-surface/40 p-6 transition-colors duration-500 hover:border-line-strong">
@@ -51,7 +51,7 @@ export default function Home() {
 
       {/* Ask my work -- interactive RAG demo */}
       <section
-        className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32"
+        className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20"
         aria-labelledby="ask-my-work"
       >
         <SectionHeading
@@ -68,9 +68,10 @@ export default function Home() {
 
       <GraphDivider />
 
-      {/* Featured highlights */}
+      {/* Featured highlights -- last section; the footer's own top margin
+          supplies the closing breathing room, so no extra bottom pad here. */}
       <section
-        className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32"
+        className="mx-auto max-w-6xl px-5 pt-16 pb-4 sm:px-8 sm:pt-20 sm:pb-6"
         aria-labelledby="featured"
       >
         <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
@@ -82,7 +83,7 @@ export default function Home() {
           />
         </div>
 
-        <div className="mt-14 grid gap-4 sm:grid-cols-2">
+        <div className="mt-12 grid gap-4 sm:grid-cols-2">
           <Reveal>
             <Link
               href="/work"
@@ -143,7 +144,7 @@ export default function Home() {
         </div>
 
         <Reveal delay={0.16}>
-          <div className="mt-16 flex flex-col items-start justify-between gap-6 rounded-2xl border border-line bg-[linear-gradient(115deg,rgba(34,211,238,0.06),rgba(167,139,250,0.06))] p-8 sm:flex-row sm:items-center sm:p-10">
+          <div className="mt-12 flex flex-col items-start justify-between gap-6 rounded-2xl border border-line bg-[linear-gradient(115deg,rgba(127,183,154,0.07),rgba(224,207,160,0.06))] p-8 sm:flex-row sm:items-center sm:p-10">
             <div>
               <h3 className="font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight sm:text-3xl balance">
                 Building something that needs an AI engineer?

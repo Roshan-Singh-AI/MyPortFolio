@@ -4,19 +4,30 @@
 /*  Palette + design tokens                                            */
 /* ------------------------------------------------------------------ */
 :root {
-  --bg: #0a0a0f;
-  --bg-elev: #101018;
-  --surface: #14141d;
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.16);
+  /* Luxury forest-green palette (ReGrowth-inspired). The accent var NAMES stay
+     "cyan"/"violet" so components don't need renaming, but they now resolve to
+     a sage/teal green scale. Accents are lightened vs the source swatches so
+     links, buttons and the AI answer stay readable on the dark green surfaces. */
+  --bg: #10150f;          /* near-black, faint green tint (base) */
+  --bg-elev: #16201a;     /* slightly elevated */
+  --surface: #1b2922;     /* deep forest green (cards/panels) -- from palette */
+  --line: rgba(180, 210, 190, 0.10);
+  --line-strong: rgba(180, 210, 190, 0.20);
 
-  --text: #ecedf2;
-  --text-dim: #9ea2b3;
-  --text-faint: #6b6f82;
+  --text: #eef2ed;        /* warm off-white */
+  --text-dim: #c2d0c4;    /* muted sage for secondary text (lifted for AA) */
+  --text-faint: #92a396;  /* faint sage (lifted for legibility) */
 
-  --accent-cyan: #22d3ee;
-  --accent-violet: #a78bfa;
-  --accent-grad: linear-gradient(115deg, #22d3ee 0%, #7dd3fc 35%, #a78bfa 100%);
+  /* "cyan" -> lightened teal-green (readable accent); "violet" -> pale sage. */
+  --accent-cyan: #7fb79a;
+  --accent-violet: #adc9b3;
+  --accent-grad: linear-gradient(115deg, #7fb79a 0%, #9ec9ac 40%, #cfe0c9 100%);
+
+  /* Champagne/gold -- the single warm metallic. Used sparingly as "jewelry"
+     on the primary CTA and one or two key highlights; green stays dominant. */
+  --accent-gold: #e0cfa0;
+  --accent-gold-soft: rgba(224, 207, 160, 0.5);
+  --accent-gold-grad: linear-gradient(115deg, #e6d5ad 0%, #d8c9a3 55%, #cbb98a 100%);
 
   --radius: 14px;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -36,6 +47,7 @@
   --color-text-faint: var(--text-faint);
   --color-cyan: var(--accent-cyan);
   --color-violet: var(--accent-violet);
+  --color-gold: var(--accent-gold);
 
   --font-sans: var(--font-sans-var);
   --font-mono: var(--font-mono-var);
@@ -64,7 +76,7 @@ body {
 }
 
 ::selection {
-  background-color: rgba(34, 211, 238, 0.28);
+  background-color: rgba(127, 183, 154, 0.32);
   color: #fff;
 }
 
@@ -73,6 +85,27 @@ body {
   outline: 2px solid var(--accent-cyan);
   outline-offset: 3px;
   border-radius: 4px;
+}
+
+/* Themed scrollbar -- forest surfaces with a sage thumb */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(127, 183, 154, 0.35) transparent;
+}
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(127, 183, 154, 0.28);
+  border: 3px solid var(--bg);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(127, 183, 154, 0.45);
 }
 
 /* ------------------------------------------------------------------ */
@@ -111,7 +144,12 @@ body {
 .glow-ring {
   box-shadow:
     0 0 0 1px var(--line-strong),
-    0 20px 60px -20px rgba(34, 211, 238, 0.18);
+    0 20px 60px -20px rgba(127, 183, 154, 0.22);
+}
+
+/* Champagne text accent -- reserved for a couple of high-value labels. */
+.text-gold {
+  color: var(--accent-gold);
 }
 
 /* Kicker / eyebrow label */
