@@ -18,6 +18,28 @@ export const DEFAULT_MODEL = "llama-3.3-70b-versatile";
 export type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
 
 /**
+ * Parse a single OpenAI-compatible SSE line (`data: {json}`) and return its
+ * content delta, or null for keep-alives / `[DONE]` / malformed lines. Shared
+ * by the read loop and the final residual-buffer flush so a last `data:` chunk
+ * with no trailing newline is not silently dropped.
+ */
+export function parseSseDelta(rawLine: string): string | null {
+  const line = rawLine.trim();
+  if (!line.startsWith("data:")) return null;
+  const payload = line.slice(5).trim();
+  if (payload === "[DONE]") return null;
+  try {
+    const json = JSON.parse(payload) as {
+      choices?: { delta?: { content?: string } }[];
+    };
+    return json.choices?.[0]?.delta?.content ?? null;
+  } catch {
+    // ignore malformed keep-alive / partial lines
+    return null;
+  }
+}
+
+/**
  * undici ProxyAgent dispatcher for HTTPS_PROXY (local dev behind a proxy).
  * Returns undefined when no proxy is configured (the normal Vercel case).
  */
@@ -156,23 +178,24 @@ export async function* streamGroq(opts: {
 
       let nl: number;
       while ((nl = buffer.indexOf("\n")) !== -1) {
-        const line = buffer.slice(0, nl).trim();
+        const line = buffer.slice(0, nl);
         buffer = buffer.slice(nl + 1);
-        if (!line.startsWith("data:")) continue;
-        const payload = line.slice(5).trim();
-        if (payload === "[DONE]") continue;
-        try {
-          const json = JSON.parse(payload) as {
-            choices?: { delta?: { content?: string } }[];
-          };
-          const delta = json.choices?.[0]?.delta?.content;
-          if (delta) {
-            emitted = true;
-            yield delta;
-          }
-        } catch {
-          // ignore malformed keep-alive / partial lines
+        const delta = parseSseDelta(line);
+        if (delta) {
+          emitted = true;
+          yield delta;
         }
+      }
+    }
+
+    // Flush any residual complete line the stream ended on WITHOUT a trailing
+    // newline (a proxy or abrupt close can deliver the last `data:` chunk this
+    // way). Without this the final delta -- possibly the only one -- is lost.
+    if (buffer.trim()) {
+      const delta = parseSseDelta(buffer);
+      if (delta) {
+        emitted = true;
+        yield delta;
       }
     }
 

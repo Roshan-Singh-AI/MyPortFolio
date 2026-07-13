@@ -1,12 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import {
-  motion,
-  useMotionValue,
-  useSpring,
-  useReducedMotion,
-} from "framer-motion";
+import { motion, useMotionValue, useSpring } from "framer-motion";
+import { useMotionGate } from "@/lib/useMotionGate";
 
 /**
  * A soft radial glow that trails the cursor. Desktop only (pointer: fine),
@@ -16,7 +12,11 @@ import {
  * until a fine pointer actually moves -- no render-triggering state needed.
  */
 export default function CursorGlow() {
-  const reduce = useReducedMotion();
+  // Gate on `mounted` (not raw useReducedMotion): the server + first client
+  // render both treat reduce=true and return null, so the SSR HTML matches the
+  // hydrated tree (no React #418 mismatch on this layout-level component). The
+  // real reduced-motion preference applies only after mount.
+  const { reduce } = useMotionGate();
   const x = useMotionValue(-1000);
   const y = useMotionValue(-1000);
   const sx = useSpring(x, { stiffness: 120, damping: 22, mass: 0.6 });

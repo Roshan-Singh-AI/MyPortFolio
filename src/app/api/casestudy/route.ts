@@ -149,8 +149,24 @@ function trimPeriod(s: string): string {
 function pseudoTokens(text: string): string[] {
   return text.match(/\S+\s*/g) ?? [text];
 }
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+/**
+ * Sleep that resolves the moment `signal` aborts, clearing its own timer, so a
+ * client disconnect tears the stream down immediately instead of waiting out
+ * the full cadence (and never leaves a pending setTimeout behind).
+ */
+function abortableSleep(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    if (signal.aborted) return resolve();
+    const t = setTimeout(resolve, ms);
+    signal.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(t);
+        resolve();
+      },
+      { once: true },
+    );
+  });
 }
 
 export async function POST(request: NextRequest): Promise<Response> {
@@ -177,7 +193,9 @@ export async function POST(request: NextRequest): Promise<Response> {
       const send = (event: Record<string, unknown>) => {
         controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
       };
-      const beat = (ms: number) => (clientSignal.aborted ? Promise.resolve() : sleep(ms));
+      // Abort-aware so an in-flight beat cancels immediately on client
+      // disconnect rather than running out the cadence.
+      const beat = (ms: number) => abortableSleep(ms, clientSignal);
 
       try {
         // --- STEP 1: read the metadata ----------------------------------
@@ -200,6 +218,10 @@ export async function POST(request: NextRequest): Promise<Response> {
         let usedModel: string | null = null;
         let note: string | undefined;
         let streamedAny = false;
+        // Set ONLY on a clean Groq loop exit. Distinguishes "Groq finished" from
+        // "Groq streamed some tokens then failed" so a mid-stream failure still
+        // delivers a COMPLETE case study instead of a truncated half-answer.
+        let completed = false;
 
         if (apiKey) {
           try {
@@ -220,6 +242,7 @@ export async function POST(request: NextRequest): Promise<Response> {
               streamedAny = true;
               send({ type: "token", text: tok });
             }
+            completed = true;
             if (streamedAny) {
               mode = "groq";
               usedModel = model;
@@ -231,12 +254,27 @@ export async function POST(request: NextRequest): Promise<Response> {
               err instanceof Error
                 ? `Groq unavailable (${err.message}); wrote a templated interpretation.`
                 : "Groq unavailable; wrote a templated interpretation.";
+            // Groq failed PART-WAY through (tokens already emitted, clean exit
+            // never reached): recover with the complete templated case study
+            // after a visual break so the visitor gets a full answer, not a
+            // truncated fragment.
+            if (streamedAny && !completed) {
+              mode = "fallback";
+              usedModel = null;
+              if (!clientSignal.aborted) send({ type: "token", text: "\n\n" });
+              for (const tok of pseudoTokens(templatedCaseStudy(meta))) {
+                if (clientSignal.aborted) break;
+                send({ type: "token", text: tok });
+                await beat(20);
+              }
+            }
           }
         } else {
           note = "No GROQ_API_KEY configured; wrote a templated interpretation (offline).";
         }
 
-        // Fallback path: stream the templated case study with a cadence.
+        // No tokens streamed at all (no key or an immediate Groq failure):
+        // stream the templated case study from scratch with a cadence.
         if (!streamedAny) {
           send({ type: "step", id: "interpret", label: "Interpret architecture", status: "done", detail: "Composed from the public metadata." });
           send({ type: "step", id: "write", label: "Write case study", status: "running" });

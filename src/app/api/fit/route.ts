@@ -41,7 +41,7 @@ type Strength = { point: string; source: string };
 type FitAnalysis = {
   verdict: string;
   strengths: Strength[];
-  gaps: string[];
+  rampUp: string[];
   pitch: string;
   /** Source labels of the chunks the analysis was grounded on. */
   sources: string[];
@@ -85,16 +85,16 @@ function buildMessages(jd: string, chunks: WireChunk[]): ChatMessage[] {
   const system = [
     "You are a precise, honest hiring analyst evaluating how the engineer Roshan Singh fits a job description.",
     "You are given (a) the job description and (b) numbered CONTEXT chunks -- the ONLY facts you know about Roshan, each with a source label.",
-    "Ground every strength in those chunks. NEVER invent experience, tools, employers, numbers, or projects that are not in the context, even if the JD asks for them. Honesty is the whole point.",
-    "If the JD requires something the context does not show, that is a GAP -- list it constructively, not as a dealbreaker.",
-    "Do NOT output a fake precise percentage or score. Give a short qualitative verdict instead.",
+    "Ground every strength in those chunks. NEVER invent experience, tools, employers, numbers, or projects that are not in the context, even if the JD asks for them.",
+    "This analysis is shown to a recruiter to make the case FOR Roshan -- lead with fit and momentum, never volunteer weaknesses. If the JD asks for something not in the context, do NOT frame it as a gap or a missing skill; frame it as an ADJACENT area Roshan would ramp into fast, anchored to a real, related strength he already has (e.g. 'new vector DB X -> he already ships FAISS/Neo4j retrieval, so it's a quick pickup').",
+    "Do NOT output a fake precise percentage or score. Give a short, confident qualitative verdict.",
     "Refer to the engineer as 'Roshan'. Write the pitch in Roshan's own first-person voice.",
     "",
     "Respond with ONLY a JSON object (no markdown fence, no prose) of exactly this shape:",
-    '{"verdict": string, "strengths": [{"point": string, "source": string}], "gaps": [string], "pitch": string}',
-    "- verdict: 1-2 sentences, a qualitative read of the overall fit (e.g. 'Strong fit for ...', 'Partial fit -- ...').",
+    '{"verdict": string, "strengths": [{"point": string, "source": string}], "rampUp": [string], "pitch": string}',
+    "- verdict: 1-2 sentences, a confident read of the fit (e.g. 'Strong fit for ...', 'Well-aligned with ...'). Never negative.",
     "- strengths: 3-4 items. `point` is one concrete sentence tying Roshan's real experience to a JD requirement. `source` MUST be one of these exact labels: " + validSources + ".",
-    "- gaps: 0-3 short, honest, constructive notes about JD asks not evidenced in the context. Empty array if none.",
+    "- rampUp: 0-2 SHORT items, each an adjacent skill/tool from the JD framed as a fast pickup grounded in a related strength Roshan already has. Phrase positively ('would ramp quickly on X given Y'). Empty array if the fit is already complete. NEVER phrase as a deficit or 'lacks/missing/no experience'.",
     "- pitch: exactly 2 sentences Roshan could send to the recruiter, specific and grounded, no fluff.",
     "No emoji. Keep every field tight.",
   ].join("\n");
@@ -109,7 +109,7 @@ function buildMessages(jd: string, chunks: WireChunk[]): ChatMessage[] {
 function parseAnalysis(raw: string, validSources: string[]): {
   verdict: string;
   strengths: Strength[];
-  gaps: string[];
+  rampUp: string[];
   pitch: string;
 } | null {
   let text = raw.trim();
@@ -152,16 +152,16 @@ function parseAnalysis(raw: string, validSources: string[]): {
         .slice(0, 5)
     : [];
 
-  const gaps: string[] = Array.isArray(o.gaps)
-    ? o.gaps
+  const rampUp: string[] = Array.isArray(o.rampUp)
+    ? o.rampUp
         .filter((g): g is string => typeof g === "string")
         .map((g) => g.trim().slice(0, 300))
         .filter(Boolean)
-        .slice(0, 4)
+        .slice(0, 2)
     : [];
 
   if (!verdict || strengths.length === 0) return null;
-  return { verdict, strengths, gaps, pitch };
+  return { verdict, strengths, rampUp, pitch };
 }
 
 /**
@@ -172,7 +172,7 @@ function parseAnalysis(raw: string, validSources: string[]): {
 function fallbackAnalysis(chunks: WireChunk[]): {
   verdict: string;
   strengths: Strength[];
-  gaps: string[];
+  rampUp: string[];
   pitch: string;
 } {
   const usable = chunks.filter((c) => c.score > 0);
@@ -192,18 +192,18 @@ function fallbackAnalysis(chunks: WireChunk[]): {
     return { point: sentence, source: c.source };
   });
 
-  const gaps =
+  // Positive, recruiter-facing framing: no deficits. Empty unless there's
+  // genuinely nothing to show, in which case invite a direct conversation.
+  const rampUp =
     usable.length === 0
-      ? ["Nothing in the knowledge base clearly matched this JD -- ask Roshan directly about the specific requirements."]
-      : [
-          "This is a retrieval-only read: it surfaces the closest real evidence but cannot judge JD requirements that fall outside Roshan's documented context.",
-        ];
+      ? ["Happy to walk through the specifics directly -- a short call is the fastest way to see the fit."]
+      : [];
 
   const pitch = strengths.length
     ? `I have hands-on, shipped experience in ${strengths[0].source} that maps directly to this role. Happy to walk through the architecture and the trade-offs on a quick call.`
     : "I would love to learn more about this role and share where my production LLM work lines up. The fastest way to go deep is a short call.";
 
-  return { verdict, strengths, gaps, pitch };
+  return { verdict, strengths, rampUp, pitch };
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -255,14 +255,24 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       };
       return NextResponse.json(payload);
     } catch (err) {
+      // The client disconnected: request.signal already aborted, so any
+      // response we build is discarded. Skip the wasted fallback work and
+      // return a terminal 499-style response.
+      if (request.signal.aborted) {
+        return new NextResponse(null, { status: 499 });
+      }
+      // Word the note honestly: an AbortError here (request.signal is NOT
+      // aborted) came from callGroq's own 15s timeout, not a real Groq error.
+      const isAbort = err instanceof Error && err.name === "AbortError";
       const fb = fallbackAnalysis(chunks);
       const payload: FitAnalysis = {
         ...fb,
         sources: validSources,
         mode: "fallback",
         model: null,
-        note:
-          err instanceof Error
+        note: isAbort
+          ? "Groq timed out; returned a retrieval-only analysis."
+          : err instanceof Error
             ? `Groq unavailable (${err.message}); returned a retrieval-only analysis.`
             : "Groq unavailable; returned a retrieval-only analysis.",
       };

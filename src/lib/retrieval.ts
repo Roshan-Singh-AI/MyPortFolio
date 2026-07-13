@@ -27,12 +27,21 @@ const STOPWORDS = new Set([
 
 /**
  * Lowercase, strip punctuation, split on whitespace, drop stopwords and
- * single characters. Deterministic and Unicode-friendly for a portfolio.
+ * single characters. Deterministic and genuinely Unicode-aware: accents are
+ * decomposed to their base letters (so "cafe" and "café" tokenize the
+ * same) and letters/numbers from any script (Latin, CJK, ...) are preserved
+ * instead of being erased by an ASCII-only class.
  */
 export function tokenize(text: string): string[] {
   return text
+    // Decompose then drop combining marks so accents collapse to base letters
+    // (e.g. "café" -> "cafe") instead of getting chopped mid-word.
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
     .toLowerCase()
-    .replace(/[^a-z0-9\s+#.]/g, " ")
+    // Keep Unicode letters/numbers (any script) plus the tech-token chars we
+    // care about; the `u` flag makes \p{L}/\p{N} match beyond ASCII.
+    .replace(/[^\p{L}\p{N}\s+#.]/gu, " ")
     // keep tech tokens like "gpt-4o", "recall@k", "c++" reasonably intact by
     // first collapsing separators, then trimming stray dots.
     .replace(/\./g, " ")
@@ -131,22 +140,18 @@ export type ScoredChunk = {
   chunk: KnowledgeChunk;
   /** Cosine similarity in [0, 1]. */
   score: number;
-  /** Query terms that actually contributed to the score (for highlighting). */
-  matchedTerms: string[];
 };
 
 /**
  * Score every chunk in the index against a query and return them sorted by
- * cosine similarity, highest first. `matchedTerms` lists the overlapping
- * query terms so the UI can explain *why* a chunk matched.
+ * cosine similarity, highest first.
  */
 export function scoreAll(index: RetrievalIndex, query: string): ScoredChunk[] {
   const queryTokens = tokenize(query);
   const fallbackIdf = Math.log((1 + index.size) / 1) + 1;
   const queryVec = buildVector(termCounts(queryTokens), index.idf, fallbackIdf);
-  const queryTermSet = new Set(queryTokens);
 
-  const scored = index.chunks.map(({ chunk, vector, tokens }) => {
+  const scored = index.chunks.map(({ chunk, vector }) => {
     // cosine similarity = dot product of two L2-normalized vectors.
     let dot = 0;
     // iterate the smaller vector for efficiency.
@@ -156,10 +161,7 @@ export function scoreAll(index: RetrievalIndex, query: string): ScoredChunk[] {
       const other = large.get(term);
       if (other !== undefined) dot += w * other;
     }
-    const matchedTerms = [...new Set(tokens)].filter((t) =>
-      queryTermSet.has(t),
-    );
-    return { chunk, score: dot, matchedTerms };
+    return { chunk, score: dot };
   });
 
   // Stable sort: score desc, then original id for determinism on ties.

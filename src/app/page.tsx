@@ -6,7 +6,7 @@ import SectionHeading from "@/components/SectionHeading";
 import { Reveal } from "@/components/RevealText";
 import MagneticButton from "@/components/MagneticButton";
 import AskMyWork from "@/components/AskMyWork";
-import { capabilities, projects } from "@/content/site";
+import { capabilities, numberWord, projects } from "@/content/site";
 
 export default function Home() {
   return (
@@ -24,7 +24,7 @@ export default function Home() {
         <SectionHeading
           id="what-i-do"
           kicker="What I do"
-          title="Three things, done well."
+          title={`${numberWord(capabilities.length)} things, done well.`}
           intro="Not a generalist spreading thin -- a builder focused on the parts of an LLM system that decide whether it actually works in production."
         />
 
@@ -156,6 +156,42 @@ export default function Home() {
             </div>
             <MagneticButton href="/contact">Get in touch</MagneticButton>
           </div>
+        </Reveal>
+
+        {/* Recruiter fast-path -- a can't-miss entry into the Fit Analyzer. */}
+        <Reveal delay={0.2}>
+          <Link
+            href="/contact#fit"
+            className="group mt-4 flex flex-col items-start justify-between gap-5 overflow-hidden rounded-2xl border border-gold/25 bg-[linear-gradient(115deg,rgba(224,207,160,0.08),rgba(127,183,154,0.05))] p-8 transition-colors duration-500 hover:border-gold/45 sm:flex-row sm:items-center sm:p-10"
+          >
+            <div className="flex items-start gap-4">
+              <span
+                aria-hidden
+                className="mt-0.5 grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-gold/40 bg-gold/[0.08] text-gold"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 3 4 7v5c0 4.5 3.4 7.7 8 9 4.6-1.3 8-4.5 8-9V7z" />
+                  <path d="m9 12 2 2 4-4" />
+                </svg>
+              </span>
+              <div>
+                <span className="kicker text-gold text-[0.6rem]">For recruiters</span>
+                <h3 className="mt-1.5 font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight sm:text-2xl balance">
+                  Have a job description? See the fit in seconds.
+                </h3>
+                <p className="mt-2 max-w-lg text-sm text-text-dim">
+                  Paste a JD into the Fit Analyzer -- it matches the role to my
+                  real work, sources every claim, and drafts a note you can send.
+                </p>
+              </div>
+            </div>
+            <span className="inline-flex shrink-0 items-center gap-2 text-sm font-medium text-gold transition-transform duration-300 group-hover:translate-x-1">
+              Try the Fit Analyzer
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+          </Link>
         </Reveal>
       </section>
     </>

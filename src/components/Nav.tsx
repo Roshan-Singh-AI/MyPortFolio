@@ -6,6 +6,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { nav, site } from "@/content/site";
 import { useCommandPalette } from "./CommandPaletteProvider";
+import Logo from "./Logo";
 
 /** Platform-aware modifier symbol. useSyncExternalStore keeps the server
  *  snapshot ("Ctrl") stable through hydration, then swaps to the client value
@@ -68,8 +69,8 @@ export default function Nav() {
           className="group flex items-center gap-2.5 text-sm font-semibold tracking-tight"
           aria-label={`${site.name} -- home`}
         >
-          <span className="relative grid h-8 w-8 place-items-center rounded-lg border border-line-strong bg-white/[0.03]">
-            <span className="h-2 w-2 rounded-full bg-[linear-gradient(115deg,#7fb79a,#adc9b3)] shadow-[0_0_10px_rgba(127,183,154,0.8)]" />
+          <span className="relative grid h-8 w-8 place-items-center rounded-lg border border-line-strong bg-white/[0.03] transition-colors duration-300 group-hover:border-cyan/40">
+            <Logo size={22} />
           </span>
           <span className="font-[family-name:var(--font-display)]">
             Roshan<span className="text-cyan">.</span>

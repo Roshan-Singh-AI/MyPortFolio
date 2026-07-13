@@ -12,8 +12,10 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { knowledge } from "@/content/knowledge";
 import { buildIndex, scoreAll } from "@/lib/retrieval";
 import { composeAnswer } from "@/lib/compose";
+import { gradeConfidence, CONFIDENCE_HIGH } from "@/lib/confidence";
 import { EASE_OUT } from "@/lib/motion";
 import { useMounted } from "@/lib/useMounted";
+import AnswerMarkdown from "@/components/AnswerMarkdown";
 
 /**
  * "Ask my work" -- a visible AI AGENT that shows its work.
@@ -131,125 +133,6 @@ function StepIcon({ id }: { id: StepId }) {
         </svg>
       );
   }
-}
-
-/* ------------------------------------------------------------------ */
-/*  Answer renderer -- turns the model's light markdown into real UI.  */
-/*  Handles: **bold**, a bold lead line, "- " bullets, and [Source]    */
-/*  citation chips. No dangerouslySetInnerHTML -- everything is real    */
-/*  React nodes, so it stays safe and matches the design system.       */
-/* ------------------------------------------------------------------ */
-function stripStrayEmoji(s: string): string {
-  // Drop emoji/pictographs the model may sprinkle in (we want a clean,
-  // engineer-y voice, not decoration). Keeps normal punctuation + text.
-  return s.replace(
-    /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}️]/gu,
-    "",
-  );
-}
-
-/**
- * World-class streaming look: each WORD arrives with a blur->sharp + rise +
- * fade micro-animation (the premium "materialize" effect seen in top AI UIs),
- * instead of a hard character dump. `animate` toggles the effect off for the
- * final settled state / reduced-motion so it stays crisp and accessible.
- */
-function AnimatedWords({ text, animate }: { text: string; animate: boolean }) {
-  const words = text.split(/(\s+)/); // keep whitespace tokens for spacing
-  if (!animate) return <>{text}</>;
-  return (
-    <>
-      {words.map((w, i) =>
-        w.trim() === "" ? (
-          <span key={`w-sp-${i}`}>{w}</span>
-        ) : (
-          <motion.span
-            key={`w-${i}`}
-            className="inline-block"
-            initial={{ opacity: 0, y: "0.25em", filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: "0em", filter: "blur(0px)" }}
-            transition={{ duration: 0.42, ease: EASE_OUT }}
-          >
-            {w}
-          </motion.span>
-        ),
-      )}
-    </>
-  );
-}
-
-/**
- * Render inline **bold** and [Source] chips within one line of text.
- * `animate` streams each word in with the materialize effect.
- */
-function renderInline(text: string, keyBase: string, animate = false) {
-  // Split on **bold** and [citation] while keeping the delimiters.
-  const parts = text.split(/(\*\*[^*]+\*\*|\[[^\]]+\])/g).filter(Boolean);
-  return parts.map((p, i) => {
-    if (p.startsWith("**") && p.endsWith("**")) {
-      return (
-        <strong key={`${keyBase}-b${i}`} className="font-semibold text-text">
-          <AnimatedWords text={p.slice(2, -2)} animate={animate} />
-        </strong>
-      );
-    }
-    if (p.startsWith("[") && p.endsWith("]")) {
-      return (
-        <motion.span
-          key={`${keyBase}-c${i}`}
-          className="mx-0.5 inline-flex items-center rounded-full border border-violet/40 bg-violet/[0.08] px-1.5 py-0.5 align-baseline font-[family-name:var(--font-mono)] text-[0.62rem] text-violet"
-          initial={animate ? { opacity: 0, scale: 0.8 } : false}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3, ease: EASE_OUT }}
-        >
-          {p.slice(1, -1)}
-        </motion.span>
-      );
-    }
-    return (
-      <span key={`${keyBase}-t${i}`}>
-        <AnimatedWords text={p} animate={animate} />
-      </span>
-    );
-  });
-}
-
-function AnswerMarkdown({ text, animate = false }: { text: string; animate?: boolean }) {
-  const clean = stripStrayEmoji(text);
-  // Break into lines; classify each as a bullet, a lead/paragraph line.
-  const lines = clean.split("\n").map((l) => l.trim()).filter(Boolean);
-  const bullets = lines.filter((l) => /^[-*]\s+/.test(l));
-  const nonBullets = lines.filter((l) => !/^[-*]\s+/.test(l));
-
-  const lead = nonBullets[0];
-  const rest = nonBullets.slice(1);
-
-  return (
-    <div className="flex flex-col gap-2 text-sm leading-relaxed text-text-dim">
-      {lead && (
-        <p className="text-text">{renderInline(lead, "lead", animate)}</p>
-      )}
-      {bullets.length > 0 && (
-        <ul className="flex flex-col gap-1.5">
-          {bullets.map((b, i) => (
-            <motion.li
-              key={`bul-${i}`}
-              className="flex gap-2"
-              initial={animate ? { opacity: 0, x: -6 } : false}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.35, ease: EASE_OUT }}
-            >
-              <span aria-hidden className="mt-[0.45rem] h-1 w-1 shrink-0 rounded-full bg-gradient-to-r from-cyan to-violet" />
-              <span>{renderInline(b.replace(/^[-*]\s+/, ""), `bul-${i}`, animate)}</span>
-            </motion.li>
-          ))}
-        </ul>
-      )}
-      {rest.map((r, i) => (
-        <p key={`rest-${i}`}>{renderInline(r, `rest-${i}`, animate)}</p>
-      ))}
-    </div>
-  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -460,9 +343,10 @@ export default function AskMyWork() {
       setChunks(localChunks);
       setScoredCount(knowledge.length);
 
-      const top = localTop[0]?.score ?? 0;
-      const label = top >= 0.16 ? "high" : top >= 0.06 ? "medium" : "low";
-      setGrade({ confidence: Math.round(top * 1000) / 1000, label });
+      // Grade with the SAME shared thresholds the server uses, so an identical
+      // top score buckets the same online and offline (no medium/low drift).
+      const graded = gradeConfidence(localTop[0]?.score ?? 0);
+      setGrade({ confidence: graded.confidence, label: graded.label });
 
       upsertStep({ id: "plan", label: "Plan", status: "done", detail: "Interpreted the question as a retrieval query." });
       upsertStep({ id: "retrieve", label: "Retrieve", status: "done", detail: `searched ${knowledge.length} chunks -> top ${localChunks.length}` });
@@ -625,7 +509,11 @@ export default function AskMyWork() {
   );
 
   const busy = phase === "running";
-  const gradePct = grade ? Math.min(100, Math.round((grade.confidence / 0.35) * 100)) : 0;
+  // Saturate the bar at the shared "high confidence" threshold so the fill and
+  // the label agree (a "high" grade shows a full bar).
+  const gradePct = grade
+    ? Math.min(100, Math.round((grade.confidence / CONFIDENCE_HIGH) * 100))
+    : 0;
 
   const gradeTone =
     grade?.label === "high"

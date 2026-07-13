@@ -20,6 +20,7 @@ import { useReducedMotion } from "framer-motion";
 import { knowledge } from "@/content/knowledge";
 import { buildIndex, scoreAll } from "@/lib/retrieval";
 import { composeAnswer } from "@/lib/compose";
+import { gradeConfidence, type ConfidenceLabel } from "@/lib/confidence";
 
 const TOP_K = 4;
 
@@ -56,7 +57,9 @@ export type AskState = {
   sources: string[];
   mode: AskMode;
   model: string | null;
-  /** Distinct sources cited, useful for source pills. */
+  /** Top cosine score, graded with the SHARED thresholds (online + offline). */
+  confidence: number | null;
+  confidenceLabel: ConfidenceLabel | null;
 };
 
 const INITIAL: AskState = {
@@ -68,6 +71,8 @@ const INITIAL: AskState = {
   sources: [],
   mode: null,
   model: null,
+  confidence: null,
+  confidenceLabel: null,
 };
 
 export function useAskStream() {
@@ -102,6 +107,9 @@ export function useAskStream() {
     async (question: string, signal: AbortSignal) => {
       const top = scoreAll(index, question).slice(0, TOP_K);
       const composed = composeAnswer(top);
+      // Grade with the SAME shared thresholds the server uses, so an identical
+      // top score buckets the same online and offline.
+      const graded = gradeConfidence(top[0]?.score ?? 0);
 
       setState((s) => ({
         ...s,
@@ -110,6 +118,8 @@ export function useAskStream() {
         mode: "fallback",
         model: null,
         streaming: true,
+        confidence: graded.confidence,
+        confidenceLabel: graded.label,
       }));
 
       if (reduce) {
@@ -148,6 +158,8 @@ export function useAskStream() {
         sources: [],
         mode: null,
         model: null,
+        confidence: null,
+        confidenceLabel: null,
       });
 
       let res: Response;
@@ -175,6 +187,15 @@ export function useAskStream() {
           case "step":
             setState((s) => ({ ...s, step: ev.label }));
             break;
+          case "grade":
+            // Server already graded with the shared thresholds; mirror it so
+            // the online + offline buckets stay consistent.
+            setState((s) => ({
+              ...s,
+              confidence: ev.confidence,
+              confidenceLabel: ev.label,
+            }));
+            break;
           case "token":
             setState((s) => ({ ...s, streaming: true, answer: s.answer + ev.text }));
             break;
@@ -188,6 +209,8 @@ export function useAskStream() {
               streaming: false,
               phase: "done",
               step: null,
+              confidence: ev.confidence,
+              confidenceLabel: ev.confidenceLabel,
             }));
             break;
           default:

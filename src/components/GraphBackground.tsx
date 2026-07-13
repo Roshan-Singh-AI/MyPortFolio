@@ -62,6 +62,14 @@ export default function GraphBackground({
     let raf = 0;
     let running = true;
     let t = 0;
+    // Throttle to ~30fps: ambient motion doesn't need 60/120fps, and halving
+    // the frame count halves the main-thread cost so it stays smooth on a busy
+    // CPU (multiple graph instances, slower laptops). Edges recompute only
+    // every few frames since nodes drift very slowly -- the O(n^2) pair scan
+    // was the per-frame hot spot.
+    const FRAME_MS = 33;
+    let lastFrame = 0;
+    let edgeTick = 0;
 
     function seed() {
       nodes = Array.from({ length: NODE_COUNT }, () => ({
@@ -101,7 +109,10 @@ export default function GraphBackground({
 
     function draw(animate: boolean) {
       ctx!.clearRect(0, 0, width, height);
-      computeEdges();
+      // Recompute edges every 6th frame (~5x/sec at 30fps) instead of every
+      // frame -- nodes move <1px/frame so the near-neighbour set barely changes.
+      if (edges.length === 0 || edgeTick % 6 === 0) computeEdges();
+      edgeTick++;
 
       // edges
       for (const e of edges) {
@@ -134,34 +145,50 @@ export default function GraphBackground({
         }
       }
 
-      // nodes
+      // nodes -- glow drawn as a cheap radial gradient instead of canvas
+      // shadowBlur (shadowBlur is one of the most expensive 2D-canvas ops and
+      // was set/reset per node every frame; a gradient halo looks the same and
+      // costs a fraction, which is what kept the motif smooth under CPU load).
       for (const n of nodes) {
         const pulse = animate ? (Math.sin(n.pulse) + 1) / 2 : 0.5;
-        const glow = 8 + pulse * 12;
+        const haloR = (n.r + pulse * 1.2) * 3.2;
+        const halo = ctx!.createRadialGradient(n.x, n.y, 0, n.x, n.y, haloR);
+        halo.addColorStop(0, `rgba(${CYAN}, ${0.28 + pulse * 0.14})`);
+        halo.addColorStop(1, `rgba(${CYAN}, 0)`);
+        ctx!.fillStyle = halo;
+        ctx!.beginPath();
+        ctx!.arc(n.x, n.y, haloR, 0, Math.PI * 2);
+        ctx!.fill();
+
         ctx!.beginPath();
         ctx!.arc(n.x, n.y, n.r + pulse * 1.2, 0, Math.PI * 2);
         ctx!.fillStyle = `rgba(${CYAN}, ${0.7 + pulse * 0.3})`;
-        ctx!.shadowBlur = glow;
-        ctx!.shadowColor = `rgba(${CYAN}, 0.85)`;
         ctx!.fill();
-        ctx!.shadowBlur = 0;
       }
     }
 
-    function step() {
+    function step(now?: number) {
       if (!running) return;
-      t += 16;
+      raf = requestAnimationFrame(step);
+      // ~30fps cap: skip this frame if not enough time has passed. Keeps the
+      // motion identical to the eye but halves CPU vs an uncapped rAF loop.
+      const ts = now ?? 0;
+      if (ts && ts - lastFrame < FRAME_MS) return;
+      // advance by real elapsed time so speed is display-rate independent.
+      const dt = lastFrame ? Math.min(ts - lastFrame, 50) : FRAME_MS;
+      lastFrame = ts;
+      t += dt;
+      const move = dt / 16; // normalize drift to the old 16ms baseline
       for (const n of nodes) {
-        n.x += n.vx;
-        n.y += n.vy;
-        n.pulse += n.pulseSpeed;
+        n.x += n.vx * move;
+        n.y += n.vy * move;
+        n.pulse += n.pulseSpeed * move;
         if (n.x < 0 || n.x > width) n.vx *= -1;
         if (n.y < 0 || n.y > height) n.vy *= -1;
         n.x = Math.max(0, Math.min(width, n.x));
         n.y = Math.max(0, Math.min(height, n.y));
       }
       draw(true);
-      raf = requestAnimationFrame(step);
     }
 
     resize();

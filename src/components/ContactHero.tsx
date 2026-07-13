@@ -74,29 +74,38 @@ export default function ContactHero() {
           className="mt-7 max-w-xl text-base leading-relaxed text-text-dim sm:text-lg"
         >
           Open to AI engineering roles and collaborations -- LLM applications,
-          RAG, and agents. The fastest way to reach me is email.
+          RAG, and agents. Hiring for a role? Paste the JD below and see, in
+          seconds, exactly where I line up.
         </motion.p>
 
-        {/* Fit analyzer -- a recruiter can paste a JD and get an honest,
-            grounded read before ever filling in the form. */}
+        {/* Fit analyzer -- FIRST-CLASS and above the fold. A recruiter can drop
+            in a JD (or one click on a sample role) and get an honest, grounded
+            read before ever filling in the form. */}
         <motion.div
+          id="fit"
           initial={reduce ? false : { opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: EASE_OUT, delay: 0.55 }}
-          className="mt-12 max-w-3xl"
+          className="mt-10 max-w-3xl scroll-mt-28"
         >
-          <div className="mb-5 flex flex-col gap-1.5">
-            <span className="kicker flex items-center gap-3 text-[0.62rem]">
-              <span className="h-px w-6 bg-cyan/60" aria-hidden />
-              Hiring for a role?
+          <div className="mb-5 flex flex-col gap-2">
+            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-gold/40 bg-gold/[0.08] px-3 py-1 text-[0.66rem] font-medium tracking-wide text-gold">
+              <span aria-hidden className="relative flex h-1.5 w-1.5">
+                {!reduce && (
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-75" />
+                )}
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gold" />
+              </span>
+              For recruiters
             </span>
-            <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight text-text sm:text-2xl">
-              Paste the JD -- see the honest fit before you reach out.
+            <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight text-text sm:text-3xl balance">
+              Paste the JD. See the fit instantly.
             </h2>
             <p className="max-w-xl text-sm leading-relaxed text-text-dim">
-              It matches the role against Roshan&apos;s real, documented
-              experience, is upfront about any gaps, and drafts a short note you
-              can use.
+              A retrieval-backed analyzer matches the role against Roshan&apos;s
+              real, documented work, calls out the strongest matches with their
+              source, and drafts a short note you can send. Grounded only in real
+              experience -- it never invents anything.
             </p>
           </div>
           <FitAnalyzer />
@@ -106,7 +115,7 @@ export default function ContactHero() {
           initial={reduce ? false : { opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: EASE_OUT, delay: 0.6 }}
-          className="mt-12 max-w-3xl"
+          className="mt-14 max-w-3xl"
         >
           <div className="mb-5 flex flex-col gap-1.5">
             <span className="kicker flex items-center gap-3 text-[0.62rem]">

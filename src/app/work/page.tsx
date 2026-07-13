@@ -4,7 +4,7 @@ import { Reveal } from "@/components/RevealText";
 import Timeline from "@/components/Timeline";
 import GraphDivider from "@/components/GraphDivider";
 import MagneticButton from "@/components/MagneticButton";
-import { experience } from "@/content/site";
+import { experience, tenureText } from "@/content/site";
 
 export const metadata: Metadata = {
   title: "Work",
@@ -20,7 +20,7 @@ export default function WorkPage() {
     <div className="mx-auto max-w-6xl px-5 pt-36 sm:px-8 sm:pt-44">
       <SectionHeading
         kicker="Experience"
-        title="Two and a half years, one clear thread."
+        title={`${tenureText("years")}, one clear thread.`}
         intro={experience.intro}
       />
 

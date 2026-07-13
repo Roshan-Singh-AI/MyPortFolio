@@ -94,7 +94,7 @@ export default function AboutPage() {
         <SectionHeading
           kicker="Toolkit"
           title="Skills, grouped by how I use them."
-          intro="Hiring for something specific? Paste a line from the job description and the skills re-rank by real semantic similarity."
+          intro="Hiring for something specific? Paste a line from the job description and the skills re-rank by semantic similarity."
         />
         <div className="mt-12 mb-8">
           <SkillMatcher groups={skillGroups} />

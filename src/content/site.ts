@@ -1,7 +1,36 @@
 /**
  * Centralized, typed site content.
  * Edit this file to update copy across the whole portfolio.
+ *
+ * DYNAMIC VALUES: anything that ages (tenure) or is a count of another list
+ * (number of projects) is COMPUTED here, never hardcoded, so it can never go
+ * stale. Add a project to `projects[]` and every "N systems" count updates;
+ * time passes and the tenure updates on its own.
  */
+
+/** Bosch start date -- the single source of truth for tenure. */
+export const BOSCH_START = new Date(2024, 0, 1); // Jan 2024
+
+/** Tenure rounded to the nearest half-year, e.g. "2.5 years", "3 years".
+ *  Deterministic per wall-clock month (server + client agree in a request). */
+export function tenureText(unit: "years" | "yrs" = "years"): string {
+  const now = new Date();
+  const months =
+    (now.getFullYear() - BOSCH_START.getFullYear()) * 12 +
+    (now.getMonth() - BOSCH_START.getMonth());
+  const years = Math.max(1, Math.round(months / 6)) / 2;
+  return `${years} ${unit}`;
+}
+
+/** Small spelled-out number -- for prose counts derived from list lengths
+ *  (e.g. "Three systems"). Capitalized; falls back to the digit past nine. */
+export function numberWord(n: number): string {
+  const words = [
+    "Zero", "One", "Two", "Three", "Four", "Five",
+    "Six", "Seven", "Eight", "Nine",
+  ];
+  return words[n] ?? String(n);
+}
 
 export const site = {
   name: "Roshan Singh",
@@ -18,6 +47,13 @@ export const site = {
     linkedin: "https://www.linkedin.com/in/roshan-singh-1617n",
   },
   url: "https://roshan-singh.vercel.app",
+  // Resume: drop your latest PDF at public/<file> and git push -- Vercel
+  // redeploys and this page serves the newest copy automatically. No CMS.
+  // Update `updated` to the month you last refreshed it (shown on the page).
+  resume: {
+    file: "/Roshan_Singh_Resume.pdf",
+    updated: "July 2026",
+  },
 } as const;
 
 export type NavItem = { label: string; href: string };
@@ -27,6 +63,7 @@ export const nav: NavItem[] = [
   { label: "Work", href: "/work" },
   { label: "Projects", href: "/projects" },
   { label: "About", href: "/about" },
+  { label: "Resume", href: "/resume" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -73,9 +110,9 @@ export const experience: Experience = {
   role: "GenAI Engineer -- Applied AI Team",
   location: "Pune, India",
   period: "Jan 2024 - Present",
-  duration: "~2.5 years",
+  duration: `~${tenureText("years")}`,
   intro:
-    "Building GenAI products with the Applied AI team -- from a two-person proof of concept to org-wide platforms now in pilot. A builder and contributor across agents, retrieval, and evaluation.",
+    "Building GenAI products with the Applied AI team -- from a two-person proof of concept to org-wide platforms now in pilot. The work spans agents, retrieval, and the evaluation that keeps them honest.",
   chapters: [
     {
       tag: "In pilot",
@@ -278,9 +315,10 @@ export type GlanceStat = {
 
 export const glanceStats: GlanceStat[] = [
   {
-    value: "~2.5 yrs",
+    // Computed from BOSCH_START (top of file) -- stays correct as time passes.
+    value: `~${tenureText("yrs")}`,
     label: "GenAI Engineer at Bosch",
-    source: "experience.duration + experience.role",
+    source: "computed: tenureText()",
   },
   {
     value: "Applied AI",
@@ -288,9 +326,10 @@ export const glanceStats: GlanceStat[] = [
     source: "experience.role -- Applied AI Team",
   },
   {
-    value: "3",
+    // Derived from the projects array so it can't drift when one is added.
+    value: `${projects.length}`,
     label: "Open-source AI systems on GitHub",
-    source: "projects[] -- GraphRAG, Agent Memory, Retrieval Router",
+    source: "projects[] length",
   },
   {
     value: "~2M",
@@ -298,9 +337,10 @@ export const glanceStats: GlanceStat[] = [
     source: "experience.chapters -- parts-data classification",
   },
   {
-    value: "2x",
+    // Derived from awards[] so it tracks the real number of recognitions.
+    value: `${awards.length}x`,
     label: "Recognized -- Rockstar & Excellence",
-    source: "experience.recognition + awards",
+    source: "awards[] length",
   },
 ];
 
@@ -333,6 +373,7 @@ export const commandTargets: CommandTarget[] = [
   { label: "Work", href: "/work", keywords: "experience bosch csai timeline career", hint: "Page" },
   { label: "Projects", href: "/projects", keywords: "graphrag agent memory retrieval router github open source", hint: "Page" },
   { label: "About", href: "/about", keywords: "bio background education recognition", hint: "Page" },
+  { label: "Resume", href: "/resume", keywords: "cv pdf download experience print hire", hint: "Page" },
   { label: "Contact", href: "/contact", keywords: "email hire reach linkedin github", hint: "Page" },
   { label: "Ask my work", href: "/#ask-my-work", keywords: "rag demo agent retrieval ai chat question", hint: "Section" },
 ];

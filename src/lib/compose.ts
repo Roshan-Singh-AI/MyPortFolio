@@ -9,6 +9,7 @@
  */
 
 import type { ScoredChunk } from "@/lib/retrieval";
+import { CONFIDENCE_FLOOR } from "@/lib/confidence";
 
 export type ComposedAnswer = {
   /** The stitched, cited answer text. Empty if nothing matched. */
@@ -19,12 +20,21 @@ export type ComposedAnswer = {
   lowConfidence: boolean;
 };
 
-/** Below this cosine similarity we treat retrieval as "no good match". */
-const CONFIDENCE_FLOOR = 0.03;
-
-/** Pull the first 1-2 sentences from a chunk so answers stay tight. */
+/**
+ * Pull the first 1-2 sentences from a chunk so answers stay tight.
+ *
+ * The splitter is abbreviation-aware: a '.' only ends a sentence when it is
+ * followed by whitespace + an uppercase/opening char or the end of the text.
+ * This keeps intra-word dots in tokens like "B.E.", "GPT-4o", "2.5" together
+ * instead of chopping "He holds a B.E. in ..." down to "He holds a B.".
+ */
 function leadSentences(text: string, max = 2): string {
-  const sentences = text.match(/[^.!?]+[.!?]+/g) ?? [text];
+  // `[\s\S]+?` (lazy, matches any char incl. newlines) lets a sentence contain
+  // interior dots like "B.E." / "2.5" / "GPT-4o"; the lookahead only ends the
+  // sentence at punctuation followed by whitespace + a sentence-starting char,
+  // or end-of-text.
+  const sentences =
+    text.match(/[\s\S]+?[.!?]+(?=\s+[A-Z0-9"'([]|\s*$)/g) ?? [text];
   return sentences
     .slice(0, max)
     .map((s) => s.trim())
@@ -59,11 +69,15 @@ export function composeAnswer(
   const seenSources = new Set<string>();
   const citations: string[] = [];
   const parts = used.map((r) => {
-    if (!seenSources.has(r.chunk.source)) {
+    // Only cite + inline-tag the FIRST chunk from a given source, so the inline
+    // [source] tags, the citation pills, and the "grounded on N sources" count
+    // all agree (dedupe on source, not just the citation label).
+    const first = !seenSources.has(r.chunk.source);
+    if (first) {
       seenSources.add(r.chunk.source);
       citations.push(r.chunk.source);
     }
-    return `${leadSentences(r.chunk.text)} [${r.chunk.source}]`;
+    return `${leadSentences(r.chunk.text)}${first ? ` [${r.chunk.source}]` : ""}`;
   });
 
   return { text: parts.join(" "), citations, lowConfidence: false };

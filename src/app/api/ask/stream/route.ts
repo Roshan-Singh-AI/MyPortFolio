@@ -31,6 +31,8 @@ import type { NextRequest } from "next/server";
 import { knowledge } from "@/content/knowledge";
 import { buildIndex, retrieve, type ScoredChunk } from "@/lib/retrieval";
 import { composeAnswer } from "@/lib/compose";
+import { gradeConfidence } from "@/lib/confidence";
+import { parseSseDelta } from "@/lib/groq";
 
 // Reads env + calls Groq at request time -> dynamic, Node runtime
 // (undici ProxyAgent is a Node API, not available on the Edge runtime).
@@ -40,11 +42,6 @@ export const dynamic = "force-dynamic";
 const TOP_K = 4;
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const DEFAULT_MODEL = "llama-3.3-70b-versatile";
-
-// Confidence thresholds for the "Grade context" agent step. Cosine scores from
-// this small corpus cluster low, so these are calibrated to it, not to 1.0.
-const CONFIDENCE_HIGH = 0.14;
-const CONFIDENCE_LOW = 0.03;
 
 // Build the TF-IDF index once per server instance (module scope).
 const index = buildIndex(knowledge);
@@ -86,17 +83,6 @@ async function getProxyDispatcher(): Promise<unknown | undefined> {
   }
 }
 
-/** Grade the retrieval: map the top cosine score to a confidence label. */
-function gradeConfidence(scored: ScoredChunk[]): {
-  confidence: number;
-  label: "high" | "medium" | "low";
-  lowConfidence: boolean;
-} {
-  const top = scored[0]?.score ?? 0;
-  const label = top >= CONFIDENCE_HIGH ? "high" : top >= CONFIDENCE_LOW ? "medium" : "low";
-  return { confidence: Math.round(top * 1000) / 1000, label, lowConfidence: top < CONFIDENCE_LOW };
-}
-
 /** Build the grounded prompt shared by streaming + non-streaming Groq calls. */
 function buildMessages(question: string, scored: ScoredChunk[]) {
   const context = scored
@@ -112,14 +98,14 @@ function buildMessages(question: string, scored: ScoredChunk[]) {
     "But be CONFIDENT and substantive: SYNTHESIZE across the chunks and give a real, decisive answer. Do NOT hedge with phrases like 'isn't explicitly stated', 'we can't say for sure', or 'seems notable'. If asked for a 'best/strongest' project, PICK one from the context and back it with its concrete details (metrics, scope, tech) -- making a well-reasoned call from the evidence is expected, not forbidden.",
     "Lead with the substance -- specifics like numbers, scale, tech, and outcomes that ARE in the context. Only fall back to a light honest one-liner (and a nudge to ask about agents/RAG/GraphRAG/evaluation) if the context genuinely has nothing relevant at all.",
     // --- Format (this is what makes it fun to read) ---------------------
-    "FORMAT your answer as GitHub-flavored markdown, and vary it to fit the question:",
-    "1) Open with ONE punchy bold lead line that hooks the reader (a real takeaway, not 'Based on the context').",
-    "2) Then, when there are multiple points, use 2-4 short bullet points ('- ' each), each ONE tight, high-signal line. If the answer is genuinely a single idea, a short 2-sentence reply is fine -- don't force bullets.",
-    "3) Optionally end with a short punchy closer line or a tasteful takeaway.",
-    "Keep it TIGHT and scannable -- no rambling paragraphs, no walls of text. Total under ~90 words.",
+    "FORMAT your answer as GitHub-flavored markdown, and vary the shape to fit the question -- never use the same template twice in a row:",
+    "1) Open with ONE bold lead line that lands a real, specific takeaway with a bit of attitude -- a line a smart friend would actually say. NEVER open with 'Based on the context', 'Roshan has built a range of', or any hedge. Name the single most interesting thing first.",
+    "2) When there are multiple points, use 2-4 short bullets ('- ' each), each ONE tight, concrete, high-signal line -- specifics (tech, scale, the clever decision), not categories. If it's really one idea, answer in 2 lively sentences instead -- don't force bullets.",
+    "3) End with a short, punchy closer that leaves a bit of personality (a takeaway, a wink, an invitation) -- not a summary of what you just said.",
+    "Keep it TIGHT and scannable -- no rambling, no walls of text, no restating the question. Total under ~85 words.",
     "Cite sources inline with square brackets using the SOURCE LABEL, e.g. [CSAI Hub] -- never bare numbers like [1]. Put the citation right after the claim it supports.",
-    "Use tasteful, sparing emphasis (bold for the key term). Do NOT use any emoji at all.",
-    "Voice: write like a real person speaking -- natural, warm, a touch of personality -- not like a machine or a bullet-point robot. Contractions are good.",
+    "Use bold sparingly for the single key term per idea. Do NOT use any emoji at all, and never write a literal asterisk in prose -- bold is rendered.",
+    "Voice: write like a sharp, warm human who's genuinely into this work -- confident, a little playful, dry wit welcome. Contractions always. Vary sentence length. Zero corporate filler, zero robot cadence.",
   ].join(" ");
 
   return [
@@ -155,7 +141,13 @@ async function* streamGroqTokens(
       },
       body: JSON.stringify({
         model,
-        temperature: 0.2,
+        // Higher temperature + presence penalty give the answer real voice and
+        // variety; the strict grounding rules in the system prompt keep it
+        // truthful. 0.2 read as dry/list-like -- this is the "less boring" knob.
+        temperature: 0.6,
+        top_p: 0.95,
+        presence_penalty: 0.3,
+        frequency_penalty: 0.3,
         max_tokens: 400,
         stream: true,
         messages: buildMessages(question, scored),
@@ -182,23 +174,23 @@ async function* streamGroqTokens(
 
       let nl: number;
       while ((nl = buffer.indexOf("\n")) !== -1) {
-        const line = buffer.slice(0, nl).trim();
+        const line = buffer.slice(0, nl);
         buffer = buffer.slice(nl + 1);
-        if (!line.startsWith("data:")) continue;
-        const payload = line.slice(5).trim();
-        if (payload === "[DONE]") continue;
-        try {
-          const json = JSON.parse(payload) as {
-            choices?: { delta?: { content?: string } }[];
-          };
-          const delta = json.choices?.[0]?.delta?.content;
-          if (delta) {
-            emitted = true;
-            yield delta;
-          }
-        } catch {
-          // ignore malformed keep-alive / partial lines
+        const delta = parseSseDelta(line);
+        if (delta) {
+          emitted = true;
+          yield delta;
         }
+      }
+    }
+
+    // Flush a residual complete line the stream ended on without a trailing
+    // newline (proxy / abrupt close), so the final delta is not dropped.
+    if (buffer.trim()) {
+      const delta = parseSseDelta(buffer);
+      if (delta) {
+        emitted = true;
+        yield delta;
       }
     }
 
@@ -215,8 +207,24 @@ function pseudoTokens(text: string): string[] {
   return text.match(/\S+\s*/g) ?? [text];
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+/**
+ * Sleep that resolves the moment `signal` aborts, clearing its own timer, so a
+ * client disconnect tears the stream down immediately instead of waiting out
+ * the full cadence (and never leaves a pending setTimeout behind).
+ */
+function abortableSleep(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    if (signal.aborted) return resolve();
+    const t = setTimeout(resolve, ms);
+    signal.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(t);
+        resolve();
+      },
+      { once: true },
+    );
+  });
 }
 
 export async function POST(request: NextRequest): Promise<Response> {
@@ -246,8 +254,10 @@ export async function POST(request: NextRequest): Promise<Response> {
       const send = (event: Record<string, unknown>) => {
         controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
       };
-      // Reduced-motion / fast clients: keep the trace legible but quick.
-      const beat = (ms: number) => (clientSignal.aborted ? Promise.resolve() : sleep(ms));
+      // Reduced-motion / fast clients: keep the trace legible but quick. The
+      // sleep is abort-aware so an in-flight beat cancels immediately on
+      // client disconnect rather than running out the cadence.
+      const beat = (ms: number) => abortableSleep(ms, clientSignal);
 
       try {
         // --- STEP 1: PLAN -------------------------------------------------
@@ -278,7 +288,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
         // --- STEP 3: GRADE CONTEXT ---------------------------------------
         send({ type: "step", id: "grade", label: "Grade context", status: "running" });
-        const grade = gradeConfidence(scored);
+        const grade = gradeConfidence(scored[0]?.score ?? 0);
         await beat(320);
         send({
           type: "grade",
@@ -326,12 +336,31 @@ export async function POST(request: NextRequest): Promise<Response> {
         let usedModel: string | null = null;
         let note: string | undefined;
         let streamedAny = false;
+        // Set ONLY on a clean Groq loop exit. Distinguishes "Groq finished" from
+        // "Groq streamed some tokens then failed" so a mid-stream failure still
+        // delivers a COMPLETE answer instead of leaving a truncated half-answer.
+        let completed = false;
 
-        // Try Groq streaming whenever we have a key AND at least one retrieved
-        // chunk. The LLM handles loosely-matched context well and is instructed
-        // to answer honestly if the context doesn't cover the question -- far
-        // better UX than dead-ending a reasonable question on a strict floor.
-        if (apiKey && scored.length > 0 && scored[0].score > 0) {
+        // Stream the composed retrieval-grounded answer with a simulated
+        // typewriter cadence. `separator` prefixes a visual break when we are
+        // recovering after a partial Groq answer already streamed.
+        const streamFallback = async (separator = false) => {
+          if (separator && !clientSignal.aborted) {
+            send({ type: "token", text: "\n\n" });
+          }
+          for (const tok of pseudoTokens(fallback.text)) {
+            if (clientSignal.aborted) break;
+            send({ type: "token", text: tok });
+            await beat(22);
+          }
+        };
+
+        // Gate Groq exactly like the non-streaming /api/ask route: call the LLM
+        // only when the retrieval cleared the confidence floor (same
+        // `lowConfidence` decision), so both endpoints answer an identical top
+        // score the same way and we never stream a live answer after grading
+        // the context "low" / emitting the Refine "no stronger match" step.
+        if (apiKey && !fallback.lowConfidence) {
           try {
             for await (const tok of streamGroqTokens(
               question,
@@ -344,6 +373,7 @@ export async function POST(request: NextRequest): Promise<Response> {
               streamedAny = true;
               send({ type: "token", text: tok });
             }
+            completed = true;
             if (streamedAny) {
               mode = "groq";
               usedModel = model;
@@ -355,6 +385,15 @@ export async function POST(request: NextRequest): Promise<Response> {
               err instanceof Error
                 ? `Groq unavailable (${err.message}); streamed retrieval-grounded answer.`
                 : "Groq unavailable; streamed retrieval-grounded answer.";
+            // If Groq failed PART-WAY through (tokens already emitted, clean
+            // exit never reached), the visitor has a truncated half-answer.
+            // Recover by streaming the complete composed answer after a break,
+            // so graceful degradation still yields an equivalent full answer.
+            if (streamedAny && !completed) {
+              mode = "fallback";
+              usedModel = null;
+              await streamFallback(true);
+            }
           }
         } else {
           note = apiKey
@@ -362,17 +401,12 @@ export async function POST(request: NextRequest): Promise<Response> {
             : "No GROQ_API_KEY configured; streamed retrieval-grounded answer (offline).";
         }
 
-        // Fallback path: stream the composed answer with a simulated cadence so
-        // the typewriter experience is identical to the live-LLM path.
+        // No tokens streamed at all (no key, low confidence, or an immediate
+        // Groq failure): stream the composed answer from scratch.
         if (!streamedAny) {
           mode = "fallback";
           usedModel = null;
-          const toks = pseudoTokens(fallback.text);
-          for (const tok of toks) {
-            if (clientSignal.aborted) break;
-            send({ type: "token", text: tok });
-            await beat(22);
-          }
+          await streamFallback(false);
         }
 
         send({ type: "step", id: "answer", label: "Answer", status: "done" });

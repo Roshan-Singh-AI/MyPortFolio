@@ -263,7 +263,6 @@ test.describe("home cold-load flash", () => {
     // web font already loaded. Capture the PLAIN-TEXT height (before the mount
     // swap installs the per-word clip spans), then the POST-swap height.
     const result = await page.evaluate(async () => {
-      // @ts-expect-error fonts API
       if (document.fonts?.ready) await document.fonts.ready;
       // Re-query fresh each time (React may replace the node on the mount swap).
       const q = () => document.querySelector("h1") as HTMLElement | null;
@@ -362,7 +361,6 @@ test.describe("route-change flash (PageTransition)", () => {
 });
 
 test.describe("reduced-motion cold load", () => {
-  test.skip(({ browserName }) => false, "");
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(RECORDER);
   });

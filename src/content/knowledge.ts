@@ -84,12 +84,12 @@ export const knowledge: KnowledgeChunk[] = [
   {
     id: "smart-retrieval-cost",
     source: "Smart Retrieval Router",
-    text: "Smart Retrieval Router cuts inference cost by about 45 percent versus always using a frontier model, while lifting nDCG ranking quality. It uses Python, cross-encoders, model routing and cost optimization, and has 30 passing tests.",
+    text: "Smart Retrieval Router pairs a difficulty-based router (easy queries to a small model, hard ones to a frontier model) with a second-stage reranker, and ships a cost model that quantifies the savings versus always using the frontier model for a given traffic mix. It uses Python, cross-encoders, model routing and cost optimization, and has 30 passing tests.",
   },
   {
     id: "evaluation",
     source: "What I do",
-    text: "Roshan proves systems work with evaluation, not assumption: reranking, cost-aware routing, RAGAS and recall@k metrics, guardrails and PII redaction. He measures RAG and agents rather than assuming they work.",
+    text: "Roshan evaluates instead of guessing: reranking, cost-aware routing, RAGAS and recall@k metrics, guardrails and PII redaction. He measures how RAG and agents actually perform.",
   },
   {
     id: "agents-capability",
@@ -99,12 +99,12 @@ export const knowledge: KnowledgeChunk[] = [
   {
     id: "retrieval-capability",
     source: "What I do",
-    text: "Roshan builds retrieval that reasons: RAG and GraphRAG pipelines with hybrid vector, graph and keyword fusion, cited answers, and clean enterprise ingestion.",
+    text: "Roshan builds retrieval systems: RAG and GraphRAG pipelines with hybrid vector, graph and keyword fusion, cited answers, and clean enterprise ingestion.",
   },
   {
     id: "about-focus",
     source: "About",
-    text: "Roshan is an AI engineer who likes the unglamorous parts of GenAI: the retrieval that finds the right context, the agent that recovers when a tool fails, and the evaluation that tells you whether it works. He is a GenAI Engineer on the Applied AI team at Bosch Global Software Technologies with about 2.5 years of experience.",
+    text: "Roshan is an AI engineer who likes the unglamorous parts of GenAI: the retrieval that finds the right context, the agent that recovers when a tool fails, and the evaluation that tells you whether it works. He is a GenAI Engineer on the Applied AI team at Bosch Global Software Technologies (joined January 2024).",
   },
   {
     id: "about-recognition",
@@ -114,12 +114,12 @@ export const knowledge: KnowledgeChunk[] = [
   {
     id: "highlights",
     source: "About",
-    text: "Career highlights: Roshan owns the UI agent in CSAI Hub (an org-wide app-builder now in pilot at Bosch), shipped a 4-country ~2M-record parts-data classification PoC that hit its target KPIs, built the RAG pipeline behind the enterprise assistant DocupediaAI, and open-sourced three AI systems: Multihop-GraphRAG, Agent Memory, and Smart Retrieval Router. His standout is CSAI Hub for scope and ownership; his most technically ambitious open-source work is Multihop-GraphRAG.",
+    text: "Career highlights: Roshan owns the UI agent in CSAI Hub (an org-wide app-builder now in pilot at Bosch), shipped a 4-country ~2M-record parts-data classification PoC that hit its target KPIs, built the RAG pipeline behind the enterprise assistant DocupediaAI, and open-sourced several AI systems including Multihop-GraphRAG, Agent Memory, and Smart Retrieval Router. His standout is CSAI Hub for scope and ownership; his most technically ambitious open-source work is Multihop-GraphRAG.",
   },
   {
     id: "why-hire",
     source: "About",
-    text: "What sets Roshan apart: he goes deep on the parts of GenAI that decide whether a system actually works in production -- retrieval quality, agents that recover from tool failures, and evaluation with real metrics. He ships fast, owns features end to end, tests his work (his open-source projects carry passing test suites), and thinks about cost and latency, not just accuracy.",
+    text: "Roshan works on the parts of GenAI that decide whether a system holds up in production: retrieval quality, agents that recover from tool failures, and evaluation with real metrics. He owns features end to end, keeps his open-source projects under test, and weighs cost and latency alongside accuracy.",
   },
   {
     id: "tech-stack",

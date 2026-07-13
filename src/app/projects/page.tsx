@@ -4,7 +4,7 @@ import ProjectsExplorer from "@/components/ProjectsExplorer";
 import LiveFromGitHub from "@/components/LiveFromGitHub";
 import { Reveal } from "@/components/RevealText";
 import MagneticButton from "@/components/MagneticButton";
-import { projects, site } from "@/content/site";
+import { numberWord, projects, site } from "@/content/site";
 
 export const metadata: Metadata = {
   title: "Projects",
@@ -23,7 +23,7 @@ export default function ProjectsPage() {
       <SectionHeading
         kicker="Projects"
         title="Retrieval and agents, built to be measured."
-        intro="Three systems I designed and built end to end -- each with tests, benchmarks, and a working demo. Search semantically below, or explore the code on GitHub."
+        intro={`${numberWord(projects.length)} systems I designed and built end to end -- each with tests, benchmarks, and a working demo. Search semantically below, or explore the code on GitHub.`}
       />
 
       <div className="mt-14">

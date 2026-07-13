@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { commandTargets, askStarters, type CommandTarget } from "@/content/site";
 import { useAskStream } from "@/lib/useAskStream";
+import AnswerMarkdown from "./AnswerMarkdown";
 import { EASE_OUT } from "@/lib/motion";
 import type { PaletteMode } from "./CommandPaletteProvider";
 
@@ -417,7 +418,7 @@ export default function CommandPalette({
               </span>
               <span className="hidden sm:inline">
                 {effectiveMode === "ask"
-                  ? "grounded on 18 facts about Roshan"
+                  ? "ask about the work -- answers cite their sources"
                   : "type a question to switch to Ask"}
               </span>
             </div>
@@ -528,8 +529,7 @@ function AskPanel({
         <div className="px-1 py-2">
           <p className="mb-3 text-[0.78rem] leading-relaxed text-text-faint">
             Ask anything about Roshan&apos;s work. The answer streams from the same
-            retrieval-augmented agent used on the home page -- grounded on real facts,
-            with cited sources.
+            retrieval-augmented agent used on the home page, with cited sources.
           </p>
           <div className="flex flex-wrap gap-2">
             {askStarters.map((q) => (
@@ -579,8 +579,8 @@ function AskPanel({
             {state.answer.length === 0 && !state.streaming ? (
               <p className="text-sm text-text-faint">Retrieving and grading context...</p>
             ) : (
-              <p className="text-sm leading-relaxed text-text">
-                {state.answer}
+              <div className="text-sm leading-relaxed text-text [&_p]:mb-2 [&_p:last-child]:mb-0">
+                <AnswerMarkdown text={state.answer} animate={!reduce} />
                 {state.streaming && (
                   <motion.span
                     aria-hidden
@@ -589,7 +589,7 @@ function AskPanel({
                     transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
                   />
                 )}
-              </p>
+              </div>
             )}
 
             {state.sources.length > 0 && (
