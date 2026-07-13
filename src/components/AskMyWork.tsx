@@ -13,6 +13,7 @@ import { knowledge } from "@/content/knowledge";
 import { buildIndex, scoreAll } from "@/lib/retrieval";
 import { composeAnswer } from "@/lib/compose";
 import { EASE_OUT } from "@/lib/motion";
+import { useMounted } from "@/lib/useMounted";
 
 /**
  * "Ask my work" -- a visible AI AGENT that shows its work.
@@ -391,7 +392,12 @@ function RetrievalGraph({
 }
 
 export default function AskMyWork() {
-  const reduce = useReducedMotion();
+  const mounted = useMounted();
+  const prefersReduced = useReducedMotion();
+  // Before mount, behave as reduced-motion so the first client render is
+  // byte-identical to the SSR output (no framer-motion attribute drift) --
+  // this is what prevents the hydration mismatch on the submit button.
+  const reduce = !mounted || prefersReduced;
   const inputId = useId();
   const answerId = useId();
   const traceId = useId();
@@ -717,7 +723,7 @@ export default function AskMyWork() {
               ) : (
                 <button
                   type="submit"
-                  disabled={query.trim().length === 0}
+                  disabled={Boolean(query.trim().length === 0)}
                   className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[linear-gradient(115deg,#22d3ee,#a78bfa)] px-6 py-3.5 text-sm font-medium text-[#08080c] transition-all duration-300 hover:shadow-[0_14px_40px_-12px_rgba(34,211,238,0.5)] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Ask
