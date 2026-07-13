@@ -1,9 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
+import type { Ref } from "react";
 import { glanceStats, coreSkills } from "@/content/site";
-import { EASE_OUT, viewportReveal } from "@/lib/motion";
+import { EASE_OUT } from "@/lib/motion";
 import { useMotionGate } from "@/lib/useMotionGate";
+import { useRevealInView } from "@/lib/useRevealInView";
 
 /**
  * "At a glance" -- the HR-scannable band, placed high on the home page so a
@@ -16,6 +18,9 @@ import { useMotionGate } from "@/lib/useMotionGate";
  */
 export default function AtAGlance() {
   const { reduce } = useMotionGate();
+  // Sits high under the Hero; use an explicit in-view trigger (amount 0.35, as
+  // before) so an above-the-fold band reveals on mount rather than sticking.
+  const { ref, inView } = useRevealInView(0.35);
 
   return (
     <section
@@ -27,9 +32,9 @@ export default function AtAGlance() {
       </h2>
 
       <motion.div
+        ref={ref as Ref<HTMLDivElement>}
         initial={reduce ? false : "hidden"}
-        whileInView={reduce ? undefined : "show"}
-        viewport={viewportReveal}
+        animate={reduce ? undefined : inView ? "show" : "hidden"}
         variants={{
           hidden: {},
           show: { transition: { staggerChildren: reduce ? 0 : 0.06 } },

@@ -27,9 +27,7 @@ export const fadeItem: Variants = {
   show: { opacity: 1, transition: { duration: 0.35, ease: EASE_OUT } },
 };
 
-/** Trigger scroll reveals early (10% visible) so content is never late. */
+/** Trigger scroll reveals early (10% visible) so content is never late.
+ *  Used by genuinely below-the-fold `whileInView` reveals; above-the-fold
+ *  reveals use `useRevealInView` so they fire for already-visible content. */
 export const viewportOnce = { once: true, amount: 0.1 } as const;
-
-/** For near-top sections: only reveal once ~1/3 is scrolled into view, so an
- *  above-the-fold band does not auto-fire on load. */
-export const viewportReveal = { once: true, amount: 0.35 } as const;

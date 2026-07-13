@@ -162,6 +162,8 @@ export default function CommandPalette({
 
   // Document-level Escape, so it always works even if focus left the panel
   // (e.g. an active element was replaced when the ask answer streamed in).
+  // Esc ALWAYS closes the palette (a modal you can't Esc out of is a bug); if an
+  // answer is mid-stream we stop it as we close, so one press does both.
   const running = state.phase === "running";
   useEffect(() => {
     if (!open) return;
@@ -169,7 +171,7 @@ export default function CommandPalette({
       if (e.key !== "Escape") return;
       e.preventDefault();
       if (running) stop();
-      else onClose();
+      onClose();
     };
     document.addEventListener("keydown", onEsc);
     return () => document.removeEventListener("keydown", onEsc);

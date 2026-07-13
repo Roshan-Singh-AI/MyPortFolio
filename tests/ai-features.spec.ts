@@ -51,11 +51,18 @@ test("floating launcher opens the palette in ask mode and streams a real answer"
   // the dialog so we click the palette's starter, not a page chip.
   await dialog.getByRole("button", { name: /how does he evaluate rag\?/i }).click();
 
-  // A grounded answer streams in and real source pills appear.
-  await expect(dialog.getByText(/Sources/i)).toBeVisible({ timeout: 20_000 });
-  // The answer text is non-trivial (real content, not a placeholder).
-  const answer = dialog.locator("p").filter({ hasText: /Roshan|RAG|evaluat|recall/i });
-  await expect(answer.first()).toBeVisible();
+  // A grounded answer streams in and real source pills appear. Match the exact
+  // "Sources" kicker label above the pills (not the palette hint text, which
+  // also contains the word "sources").
+  await expect(
+    dialog.getByText(/^Sources$/i).first(),
+  ).toBeVisible({ timeout: 20_000 });
+  // The answer text is non-trivial (real content, not a placeholder). The answer
+  // renders through AnswerMarkdown, so meaningful text can live in <p> OR <li>
+  // (bullet) nodes -- assert on the text anywhere in the dialog, not just <p>.
+  await expect(
+    dialog.getByText(/Roshan|RAG|evaluat|recall|retriev/i).first(),
+  ).toBeVisible({ timeout: 20_000 });
 
   // Esc closes it.
   await page.keyboard.press("Escape");

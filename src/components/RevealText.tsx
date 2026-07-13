@@ -1,9 +1,10 @@
 "use client";
 
 import { motion, type Variants } from "framer-motion";
-import { EASE_OUT, viewportOnce } from "@/lib/motion";
+import { EASE_OUT } from "@/lib/motion";
 import { useMotionGate } from "@/lib/useMotionGate";
-import { createElement, type ReactNode } from "react";
+import { useRevealInView } from "@/lib/useRevealInView";
+import { createElement, type Ref, type ReactNode } from "react";
 
 /** Tags this component can render as. Motion versions are declared once, at
  *  module scope, so no component is created during render. */
@@ -45,6 +46,9 @@ export default function RevealText({
   stagger = 0.035,
 }: RevealTextProps) {
   const { reduce } = useMotionGate();
+  // Explicit in-view trigger (fires for already-visible content at mount) so an
+  // above-the-fold heading never stays hidden waiting for a scroll.
+  const { ref, inView } = useRevealInView();
   const units = by === "char" ? Array.from(text) : text.split(" ");
 
   if (reduce) {
@@ -68,17 +72,19 @@ export default function RevealText({
 
   const MotionTag = MOTION_TAGS[as];
 
-  const trigger = animateOnMount
-    ? ({ animate: "show" } as const)
-    : ({ whileInView: "show", viewport: viewportOnce } as const);
+  // animateOnMount plays immediately; otherwise reveal when in view -- but via
+  // an explicit `animate` state (not bare whileInView) so already-visible
+  // content reveals on mount instead of sticking until a scroll.
+  const animate = animateOnMount || inView ? "show" : "hidden";
 
   return (
     <MotionTag
+      ref={ref as Ref<HTMLHeadingElement & HTMLParagraphElement & HTMLSpanElement>}
       id={id}
       className={className}
       variants={container}
       initial="hidden"
-      {...trigger}
+      animate={animate}
       aria-label={text}
     >
       {units.map((unit, i) => (
@@ -111,14 +117,15 @@ export function Reveal({
   delay?: number;
 }) {
   const { reduce } = useMotionGate();
+  const { ref, inView } = useRevealInView();
   if (reduce) return <div className={className}>{children}</div>;
 
   return (
     <motion.div
+      ref={ref as Ref<HTMLDivElement>}
       className={className}
       initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={viewportOnce}
+      animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
       transition={{ duration: 0.7, ease: EASE_OUT, delay }}
     >
       {children}

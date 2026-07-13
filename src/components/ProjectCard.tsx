@@ -1,10 +1,12 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
-import type { MouseEvent } from "react";
+import { motion } from "framer-motion";
+import type { MouseEvent, Ref } from "react";
 import type { Project } from "@/content/site";
 import ArchitectureDiagram from "./ArchitectureDiagram";
-import { EASE_OUT, viewportOnce } from "@/lib/motion";
+import { EASE_OUT } from "@/lib/motion";
+import { useMotionGate } from "@/lib/useMotionGate";
+import { useRevealInView } from "@/lib/useRevealInView";
 
 /** Rich "system card" for a project, with a glow-on-hover surface. */
 export default function ProjectCard({
@@ -17,10 +19,17 @@ export default function ProjectCard({
   /** When set (semantic search active), shows the real similarity match. */
   matchPct?: number | null;
 }) {
-  const reduce = useReducedMotion();
+  // Gate on `mounted` (not raw useReducedMotion) so the SSR HTML matches the
+  // first client render -- otherwise the top card is emitted hidden and, if the
+  // viewport observer never fires for already-in-view content, stays hidden
+  // until a scroll (the reported bug).
+  const { reduce } = useMotionGate();
+  // Explicit in-view trigger reveals already-visible cards on mount.
+  const { ref, inView } = useRevealInView();
   // Inside the semantic explorer (matchPct !== null) the parent handles layout
   // motion, so the card skips its own scroll-reveal to avoid fighting reorder.
   const inExplorer = matchPct !== null;
+  const animateReveal = !reduce && !inExplorer;
 
   function trackGlow(e: MouseEvent<HTMLElement>) {
     const el = e.currentTarget;
@@ -31,10 +40,12 @@ export default function ProjectCard({
 
   return (
     <motion.article
+      ref={ref as Ref<HTMLElement>}
       onMouseMove={trackGlow}
-      initial={reduce || inExplorer ? false : { opacity: 0, y: 30 }}
-      whileInView={reduce || inExplorer ? undefined : { opacity: 1, y: 0 }}
-      viewport={viewportOnce}
+      initial={animateReveal ? { opacity: 0, y: 30 } : false}
+      animate={
+        animateReveal ? (inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }) : undefined
+      }
       transition={{ duration: 0.7, ease: EASE_OUT, delay: (index % 2) * 0.08 }}
       className="group relative h-full overflow-hidden rounded-2xl border border-line bg-surface/40 p-6 transition-colors duration-500 hover:border-line-strong sm:p-8"
     >

@@ -1,8 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { viewportOnce } from "@/lib/motion";
+import type { Ref } from "react";
 import { useMotionGate } from "@/lib/useMotionGate";
+import { useRevealInView } from "@/lib/useRevealInView";
 
 /**
  * A small animated architecture pipeline: labelled nodes connected by
@@ -20,17 +21,21 @@ export default function ArchitectureDiagram({
   // first client render -- the structurally-conditional {!reduce && ...} dot
   // otherwise causes a React #418 hydration mismatch under reduced motion.
   const { reduce } = useMotionGate();
+  // One container-level in-view trigger drives every node so an above-the-fold
+  // diagram (nested in the top project card) reveals on mount, not on scroll.
+  const { ref, inView } = useRevealInView();
   const count = nodes.length;
 
   return (
     <figure className="w-full">
-      <div className="flex flex-wrap items-center gap-2">
+      <div ref={ref as Ref<HTMLDivElement>} className="flex flex-wrap items-center gap-2">
         {nodes.map((node, i) => (
           <div key={node} className="flex items-center gap-2">
             <motion.span
               initial={reduce ? false : { opacity: 0, scale: 0.85 }}
-              whileInView={reduce ? undefined : { opacity: 1, scale: 1 }}
-              viewport={viewportOnce}
+              animate={
+                reduce ? undefined : inView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.85 }
+              }
               transition={{ delay: i * 0.09, duration: 0.4 }}
               className="rounded-lg border border-line-strong bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-text-dim"
             >
