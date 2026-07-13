@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import SectionHeading from "@/components/SectionHeading";
 import ProjectsExplorer from "@/components/ProjectsExplorer";
+import LiveFromGitHub from "@/components/LiveFromGitHub";
 import { Reveal } from "@/components/RevealText";
 import MagneticButton from "@/components/MagneticButton";
 import { projects, site } from "@/content/site";
@@ -28,6 +29,10 @@ export default function ProjectsPage() {
       <div className="mt-14">
         <ProjectsExplorer projects={projects} />
       </div>
+
+      {/* Living portfolio -- live, client-fetched GitHub repos + an agent that
+          writes an architecture case study for any one of them. */}
+      <LiveFromGitHub />
 
       <Reveal delay={0.1}>
         <div className="mt-16 mb-8 flex flex-col items-start gap-4 border-t border-line pt-10 sm:flex-row sm:items-center sm:justify-between">

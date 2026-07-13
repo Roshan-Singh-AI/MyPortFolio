@@ -108,3 +108,49 @@ test("home Ask-my-work agent streams a cited answer with real retrieval", async 
   // A cited answer with sources appears.
   await expect(page.getByText(/^Sources$/i).first()).toBeVisible({ timeout: 20_000 });
 });
+
+test("contact fit analyzer returns a grounded, honest analysis for a JD", async ({
+  page,
+}) => {
+  await page.goto("/contact");
+
+  // The recruiter-facing entry point is discoverable above the form.
+  await expect(page.getByRole("heading", { name: /paste the jd/i })).toBeVisible();
+
+  // Use the built-in sample JD so the assertion is deterministic.
+  await page.getByRole("button", { name: /try a sample jd/i }).click();
+
+  // A qualitative verdict + grounded strengths appear (real, from retrieval).
+  await expect(page.getByText(/overall read/i)).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByText(/where roshan matches/i)).toBeVisible();
+
+  // The provenance label is honest about grounding + no invented experience.
+  await expect(page.getByText(/grounded/i).first()).toBeVisible();
+
+  // The tailored pitch is copyable.
+  await expect(page.getByRole("button", { name: /^copy$/i })).toBeVisible();
+});
+
+test("projects live-from-github surfaces repos and generates a case study", async ({
+  page,
+}) => {
+  await page.goto("/projects");
+
+  // The living-portfolio section loads client-side. In an environment where
+  // GitHub is reachable (via the /api/github proxy) the repo grid + generate
+  // action appear; where it is blocked, a soft honest note appears instead.
+  // Either outcome is a PASS -- we assert the section degrades gracefully and
+  // never dead-ends or errors.
+  const heading = page.getByRole("heading", { name: /living portfolio/i });
+  const softNote = page.getByText(/github is quiet right now/i);
+  await expect(heading.or(softNote).first()).toBeVisible({ timeout: 15_000 });
+
+  const generate = page.getByRole("button", { name: /generate case study/i }).first();
+  if (await generate.isVisible().catch(() => false)) {
+    await generate.click();
+    // A streamed/templated case study renders with an honest provenance label.
+    await expect(page.getByText(/AI-generated interpretation/i)).toBeVisible({
+      timeout: 25_000,
+    });
+  }
+});

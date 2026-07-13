@@ -78,9 +78,13 @@ test("nav links reach every section", async ({ page }) => {
 
 test("projects page shows all three projects and links to GitHub", async ({ page }) => {
   await page.goto("/projects");
-  await expect(page.getByText(/Multihop-GraphRAG/i)).toBeVisible();
-  await expect(page.getByText(/Agent Memory/i)).toBeVisible();
-  await expect(page.getByText(/Smart Retrieval Router/i)).toBeVisible();
+  // Scope to the project cards (<article>) so these don't clash with the
+  // separate "Live from GitHub" repo grid, which may also list a repo of the
+  // same name when the live GitHub proxy is reachable.
+  const cards = page.locator("article");
+  await expect(cards.filter({ hasText: /Multihop-GraphRAG/i }).first()).toBeVisible();
+  await expect(cards.filter({ hasText: /Agent Memory/i }).first()).toBeVisible();
+  await expect(cards.filter({ hasText: /Smart Retrieval Router/i }).first()).toBeVisible();
 
   // the flagship repo link is present and correct
   const repo = page.getByRole("link", {

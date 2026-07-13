@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import GraphBackground from "./GraphBackground";
 import RevealText from "./RevealText";
 import ContactForm from "./ContactForm";
+import FitAnalyzer from "./FitAnalyzer";
 import { site } from "@/content/site";
 import { EASE_OUT } from "@/lib/motion";
 
@@ -34,7 +35,7 @@ export default function ContactHero() {
   return (
     <section
       id="contact"
-      className="relative flex min-h-[100svh] items-center overflow-hidden"
+      className="relative flex min-h-[100svh] items-start overflow-hidden"
     >
       <div aria-hidden className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-grid opacity-30" />
@@ -44,7 +45,7 @@ export default function ContactHero() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_50%,transparent,rgba(10,10,15,0.7))]" />
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-5 py-32 sm:px-8">
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-5 pt-36 pb-32 sm:px-8 sm:pt-44">
         <motion.span
           initial={reduce ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -75,12 +76,43 @@ export default function ContactHero() {
           RAG, and agents. The fastest way to reach me is email.
         </motion.p>
 
+        {/* Fit analyzer -- a recruiter can paste a JD and get an honest,
+            grounded read before ever filling in the form. */}
+        <motion.div
+          initial={reduce ? false : { opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: EASE_OUT, delay: 0.55 }}
+          className="mt-12 max-w-3xl"
+        >
+          <div className="mb-5 flex flex-col gap-1.5">
+            <span className="kicker flex items-center gap-3 text-[0.62rem]">
+              <span className="h-px w-6 bg-cyan/60" aria-hidden />
+              Hiring for a role?
+            </span>
+            <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight text-text sm:text-2xl">
+              Paste the JD -- see the honest fit before you reach out.
+            </h2>
+            <p className="max-w-xl text-sm leading-relaxed text-text-dim">
+              It matches the role against Roshan&apos;s real, documented
+              experience, is upfront about any gaps, and drafts a short note you
+              can use.
+            </p>
+          </div>
+          <FitAnalyzer />
+        </motion.div>
+
         <motion.div
           initial={reduce ? false : { opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: EASE_OUT, delay: 0.6 }}
-          className="mt-10 max-w-3xl"
+          className="mt-12 max-w-3xl"
         >
+          <div className="mb-5 flex flex-col gap-1.5">
+            <span className="kicker flex items-center gap-3 text-[0.62rem]">
+              <span className="h-px w-6 bg-cyan/60" aria-hidden />
+              Or just say hello
+            </span>
+          </div>
           <ContactForm />
         </motion.div>
 
