@@ -19,12 +19,13 @@ export default function WorkPage() {
   return (
     <div className="mx-auto max-w-6xl px-5 pt-36 sm:px-8 sm:pt-44">
       <SectionHeading
+        onMount
         kicker="Experience"
         title={`${tenureText("years")}, one clear thread.`}
         intro={experience.intro}
       />
 
-      <Reveal delay={0.1}>
+      <Reveal delay={0.2} onMount>
         <div className="mt-10 flex flex-col gap-3 rounded-2xl border border-line bg-surface/40 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
           <div>
             <p className="font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight">

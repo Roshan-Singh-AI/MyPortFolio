@@ -20,12 +20,13 @@ export default function AboutPage() {
   return (
     <div className="mx-auto max-w-6xl px-5 pt-36 sm:px-8 sm:pt-44">
       <SectionHeading
+        onMount
         kicker="About"
         title="Engineer first, hype last."
       />
 
       <div className="mt-10 grid gap-8 md:grid-cols-[1.4fr_1fr]">
-        <Reveal>
+        <Reveal onMount delay={0.15}>
           <div className="flex flex-col gap-5 text-base leading-relaxed text-text-dim">
             <p>
               I am an AI engineer who likes the unglamorous parts of GenAI --
@@ -48,7 +49,7 @@ export default function AboutPage() {
           </div>
         </Reveal>
 
-        <Reveal delay={0.1}>
+        <Reveal delay={0.25} onMount>
           <div className="flex flex-col gap-6">
             <div className="rounded-2xl border border-line bg-surface/40 p-6">
               <span className="kicker">Education</span>

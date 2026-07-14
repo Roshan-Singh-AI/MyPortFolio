@@ -116,23 +116,44 @@ export default function RevealText({
 }
 
 /**
- * Content-block reveal. Emits the `.reveal` class (buttery fade-up +
- * blur-sharpen); the single root-level IntersectionObserver (useScrollReveal)
- * adds `.is-in` when it enters view -- immediately for content already on-screen
- * at load/nav, so it can't stick or flicker. `delay` maps to a small stagger
- * index for a gentle cascade when several sit together.
+ * Content-block reveal, two modes:
+ *
+ *  - onMount (the FIRST section of a page -- above the fold): a framer fade+rise
+ *    that plays immediately on mount, layered cleanly with PageTransition. This
+ *    is the Contact-style entrance, and because it never uses the scroll system
+ *    it CANNOT double-render / fight the page transition.
+ *  - default (lower sections): emits the `.reveal` class; the root observer
+ *    (useScrollReveal) reveals it as it scrolls into view. That observer only
+ *    ever arms genuinely below-the-fold content and waits for the page
+ *    transition to settle, so it never touches the first section.
  */
 export function Reveal({
   children,
   className = "",
   delay = 0,
+  onMount = false,
 }: {
   children: ReactNode;
   className?: string;
   delay?: number;
+  onMount?: boolean;
 }) {
-  // delay (seconds) -> a stagger index; keeps the old call sites working while
-  // driving the CSS cascade offset. Clamped so the range stays sensible.
+  const { reduce } = useMotionGate();
+
+  if (onMount) {
+    return (
+      <motion.div
+        className={className}
+        initial={reduce ? false : { opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: EASE_REVEAL, delay }}
+      >
+        {children}
+      </motion.div>
+    );
+  }
+
+  // Lower sections: scroll reveal via the `.reveal` class + root observer.
   const i = Math.min(6, Math.round(delay / 0.1));
   return (
     <div

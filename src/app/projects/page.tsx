@@ -21,6 +21,7 @@ export default function ProjectsPage() {
   return (
     <div className="mx-auto max-w-6xl px-5 pt-36 sm:px-8 sm:pt-44">
       <SectionHeading
+        onMount
         kicker="Projects"
         title="Retrieval and agents, built to be measured."
         intro={`${numberWord(projects.length)} systems I designed and built end to end -- each with tests, benchmarks, and a working demo. Search semantically below, or explore the code on GitHub.`}

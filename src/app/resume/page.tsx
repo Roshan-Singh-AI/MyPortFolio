@@ -21,12 +21,13 @@ export default function ResumePage() {
   return (
     <div className="mx-auto max-w-6xl px-5 pt-36 sm:px-8 sm:pt-44">
       <SectionHeading
+        onMount
         kicker="Resume"
         title="The one-page version."
         intro="For when you need the PDF. View it inline or download a copy -- always the latest."
       />
 
-      <Reveal>
+      <Reveal onMount delay={0.2}>
         <div className="mt-10 flex flex-wrap items-center gap-3">
           <MagneticButton href={file} external>
             View full screen
@@ -49,7 +50,7 @@ export default function ResumePage() {
       {/* Embedded preview. <object> renders the PDF inline where supported and
           falls back to the message + buttons above where it is not (e.g. some
           mobile browsers block inline PDF). */}
-      <Reveal delay={0.08}>
+      <Reveal delay={0.32} onMount>
         <div className="glow-ring mt-8 mb-12 overflow-hidden rounded-2xl border border-line bg-surface/40">
           <object
             data={`${file}#view=FitH`}
