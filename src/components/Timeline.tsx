@@ -3,7 +3,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import type { Experience } from "@/content/site";
-import { EASE_OUT, viewportOnce } from "@/lib/motion";
 import { useMotionGate } from "@/lib/useMotionGate";
 
 type Chapter = Experience["chapters"][number];
@@ -42,13 +41,9 @@ export default function Timeline({ chapters }: { chapters: Chapter[] }) {
 
       <ol className="flex flex-col gap-12">
         {chapters.map((ch, i) => (
-          <motion.li
+          <li
             key={ch.title}
-            initial={reduce ? false : { opacity: 0, y: 26 }}
-            whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
-            viewport={viewportOnce}
-            transition={{ duration: 0.6, ease: EASE_OUT }}
-            className="relative grid grid-cols-[auto_1fr] gap-x-5 md:grid-cols-[8rem_1fr] md:gap-x-8"
+            className="reveal relative grid grid-cols-[auto_1fr] gap-x-5 md:grid-cols-[8rem_1fr] md:gap-x-8"
           >
             {/* index / marker column */}
             <div className="relative flex items-start md:justify-end">
@@ -87,7 +82,7 @@ export default function Timeline({ chapters }: { chapters: Chapter[] }) {
                 </div>
               )}
             </div>
-          </motion.li>
+          </li>
         ))}
       </ol>
     </div>

@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import CommandPalette from "./CommandPalette";
+import { useScrollReveal } from "@/lib/useScrollReveal";
 
 /**
  * Shared state for the global command palette so ANY component (the nav pill,
@@ -46,6 +47,10 @@ export default function CommandPaletteProvider({
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<PaletteMode>("navigate");
   const [seed, setSeed] = useState("");
+
+  // Drives the site-wide scroll-reveal (adds `.is-in` to `.reveal*` elements;
+  // re-scans on route change). Mounted once, here, inside the client boundary.
+  useScrollReveal();
 
   const openPalette = useCallback((nextMode: PaletteMode = "navigate", nextSeed = "") => {
     setMode(nextMode);

@@ -1,14 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { Ref } from "react";
 import { useMotionGate } from "@/lib/useMotionGate";
-import { useRevealInView } from "@/lib/useRevealInView";
 
 /**
- * A small animated architecture pipeline: labelled nodes connected by
- * edges that draw in on scroll, with a pulsing "data" dot travelling the
- * path. Purely illustrative of a project's flow.
+ * A small architecture pipeline: labelled nodes connected by edges, with a
+ * pulsing "data" dot travelling the path. Node entrance is pure CSS
+ * (`.reveal-stagger`, view() timeline -- no JS, visible by default). The
+ * travelling dot is a gated, always-on decorative loop (never a scroll reveal).
  */
 export default function ArchitectureDiagram({
   nodes,
@@ -17,30 +16,21 @@ export default function ArchitectureDiagram({
   nodes: string[];
   caption: string;
 }) {
-  // Gate on `mounted` (not raw useReducedMotion) so the SSR HTML matches the
-  // first client render -- the structurally-conditional {!reduce && ...} dot
-  // otherwise causes a React #418 hydration mismatch under reduced motion.
+  // Gate the infinite dot loop so SSR + first client render match (no #418).
   const { reduce } = useMotionGate();
-  // One container-level in-view trigger drives every node so an above-the-fold
-  // diagram (nested in the top project card) reveals on mount, not on scroll.
-  const { ref, inView } = useRevealInView();
   const count = nodes.length;
 
   return (
     <figure className="w-full">
-      <div ref={ref as Ref<HTMLDivElement>} className="flex flex-wrap items-center gap-2">
+      <div className="reveal-stagger flex flex-wrap items-center gap-2">
         {nodes.map((node, i) => (
           <div key={node} className="flex items-center gap-2">
-            <motion.span
-              initial={reduce ? false : { opacity: 0, scale: 0.85 }}
-              animate={
-                reduce ? undefined : inView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.85 }
-              }
-              transition={{ delay: i * 0.09, duration: 0.4 }}
+            <span
+              style={{ "--reveal-i": i } as React.CSSProperties}
               className="rounded-lg border border-line-strong bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-text-dim"
             >
               {node}
-            </motion.span>
+            </span>
             {i < count - 1 && (
               <span
                 aria-hidden

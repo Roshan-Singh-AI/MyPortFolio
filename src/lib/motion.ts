@@ -1,33 +1,18 @@
-import type { Variants } from "framer-motion";
+/**
+ * Shared motion constants.
+ *
+ * Scroll-reveal entrances are now pure CSS (see the `.reveal` /
+ * `.reveal-stagger` / `.reveal-words` system in globals.css, driven by
+ * `animation-timeline: view()`), so the old framer reveal variants
+ * (staggerParent/riseItem/fadeItem/viewportOnce) were removed. These easings
+ * remain for micro-interactions, page transitions, and the hero on-mount intro.
+ */
 
+/** Snappy ease for micro-interactions (hover, nav pill, small UI motion). */
 export const EASE_OUT = [0.16, 1, 0.3, 1] as const;
+
+/** Symmetric ease for reversible / looping motion. */
 export const EASE_INOUT = [0.65, 0, 0.35, 1] as const;
 
-/** Container that staggers its children into view. */
-export const staggerParent: Variants = {
-  hidden: {},
-  show: {
-    transition: { staggerChildren: 0.05, delayChildren: 0.02 },
-  },
-};
-
-/** A single element rising into view. Snappy so it reads crisp, not sluggish. */
-export const riseItem: Variants = {
-  hidden: { opacity: 0, y: 18 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: EASE_OUT },
-  },
-};
-
-/** Simple fade for less prominent elements. */
-export const fadeItem: Variants = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { duration: 0.35, ease: EASE_OUT } },
-};
-
-/** Trigger scroll reveals early (10% visible) so content is never late.
- *  Used by genuinely below-the-fold `whileInView` reveals; above-the-fold
- *  reveals use `useRevealInView` so they fire for already-visible content. */
-export const viewportOnce = { once: true, amount: 0.1 } as const;
+/** Gentle, even deceleration for content entrances (the hero word-rise). */
+export const EASE_REVEAL = [0.22, 0.61, 0.36, 1] as const;

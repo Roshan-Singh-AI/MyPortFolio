@@ -1,13 +1,11 @@
 "use client";
 
 import { motion, type Variants } from "framer-motion";
-import { EASE_OUT } from "@/lib/motion";
+import { EASE_REVEAL } from "@/lib/motion";
 import { useMotionGate } from "@/lib/useMotionGate";
-import { useRevealInView } from "@/lib/useRevealInView";
-import { createElement, type Ref, type ReactNode } from "react";
+import { createElement, type ReactNode } from "react";
 
-/** Tags this component can render as. Motion versions are declared once, at
- *  module scope, so no component is created during render. */
+/** Tags this component can render as. */
 type Tag = "span" | "h1" | "h2" | "h3" | "p";
 
 const MOTION_TAGS = {
@@ -20,20 +18,30 @@ const MOTION_TAGS = {
 
 type RevealTextProps = {
   text: string;
-  /** Split by "word" (default) or "char" for a tighter mask animation. */
+  /** Split by "word" (default) or "char". */
   by?: "word" | "char";
   as?: Tag;
   className?: string;
   id?: string;
-  /** Play immediately on mount instead of when scrolled into view. */
+  /**
+   * Play the word-rise immediately on mount (the hero). When false (the
+   * default) the heading reveals on SCROLL via a pure-CSS view() timeline --
+   * no JS observer, no framer state, so it can't flicker/stick/jank.
+   */
   animateOnMount?: boolean;
   delay?: number;
   stagger?: number;
 };
 
 /**
- * Masked reveal for headlines. Each unit rises out from behind a clip.
- * Respects prefers-reduced-motion by rendering plain text.
+ * Masked word-rise for headlines -- the site's signature motion.
+ *
+ *  - animateOnMount (the hero only): framer plays the rise once on mount. This
+ *    path never had the scroll bugs, so it's kept as-is.
+ *  - default (every other heading): a JS-free CSS scroll-driven reveal. The
+ *    words are visible by default and rise from behind a clip as the heading
+ *    enters view, driven by `animation-timeline: view()` on the compositor
+ *    thread. Reduced-motion / unsupported browsers render plain visible text.
  */
 export default function RevealText({
   text,
@@ -46,67 +54,74 @@ export default function RevealText({
   stagger = 0.035,
 }: RevealTextProps) {
   const { reduce } = useMotionGate();
-  // Explicit in-view trigger (fires for already-visible content at mount) so an
-  // above-the-fold heading never stays hidden waiting for a scroll.
-  const { ref, inView } = useRevealInView();
   const units = by === "char" ? Array.from(text) : text.split(" ");
 
+  // Reduced motion (and SSR/first paint via the gate): plain, visible text.
   if (reduce) {
     return createElement(as, { className, id }, text);
   }
 
-  const container: Variants = {
-    hidden: {},
-    show: {
-      transition: { staggerChildren: stagger, delayChildren: delay },
-    },
-  };
-
-  const child: Variants = {
-    hidden: { y: "115%" },
-    show: {
-      y: "0%",
-      transition: { duration: 0.5, ease: EASE_OUT },
-    },
-  };
-
-  const MotionTag = MOTION_TAGS[as];
-
-  // animateOnMount plays immediately; otherwise reveal when in view -- but via
-  // an explicit `animate` state (not bare whileInView) so already-visible
-  // content reveals on mount instead of sticking until a scroll.
-  const animate = animateOnMount || inView ? "show" : "hidden";
-
-  return (
-    <MotionTag
-      ref={ref as Ref<HTMLHeadingElement & HTMLParagraphElement & HTMLSpanElement>}
-      id={id}
-      className={className}
-      variants={container}
-      initial="hidden"
-      animate={animate}
-      aria-label={text}
-    >
-      {units.map((unit, i) => (
-        <span key={`${unit}-${i}`} aria-hidden>
-          {/* The clip wraps ONLY the moving word; the space is a real,
-              unclipped space rendered between clips so words never merge. */}
-          <span
-            className="inline-block overflow-hidden align-bottom"
-            style={{ paddingBottom: "0.08em", marginBottom: "-0.08em" }}
-          >
-            <motion.span variants={child} className="inline-block">
-              {unit}
-            </motion.span>
+  // ---- HERO PATH: framer on-mount word-rise (unchanged, proven) ----------
+  if (animateOnMount) {
+    const container: Variants = {
+      hidden: {},
+      show: { transition: { staggerChildren: stagger, delayChildren: delay } },
+    };
+    const child: Variants = {
+      hidden: { y: "115%" },
+      show: { y: "0%", transition: { duration: 0.6, ease: EASE_REVEAL } },
+    };
+    const MotionTag = MOTION_TAGS[as];
+    return (
+      <MotionTag
+        id={id}
+        className={className}
+        variants={container}
+        initial="hidden"
+        animate="show"
+        aria-label={text}
+      >
+        {units.map((unit, i) => (
+          <span key={`${unit}-${i}`} aria-hidden>
+            <span
+              className="inline-block overflow-hidden align-bottom"
+              style={{ paddingBottom: "0.08em", marginBottom: "-0.08em" }}
+            >
+              <motion.span variants={child} className="inline-block">
+                {unit}
+              </motion.span>
+            </span>
+            {by === "word" && i < units.length - 1 ? " " : ""}
           </span>
-          {by === "word" && i < units.length - 1 ? " " : ""}
+        ))}
+      </MotionTag>
+    );
+  }
+
+  // ---- SCROLL PATH: pure-CSS view() word-rise (fresh, jank-proof) ---------
+  // `.reveal-words` sets the named view timeline; each `.reveal-word-clip > span`
+  // rises on scroll with a per-word --reveal-i cascade (see globals.css).
+  return createElement(
+    as,
+    { id, className: `reveal-words ${className}`.trim(), "aria-label": text },
+    units.map((unit, i) => (
+      <span key={`${unit}-${i}`} aria-hidden>
+        <span className="reveal-word-clip">
+          <span style={{ "--reveal-i": i } as React.CSSProperties}>{unit}</span>
         </span>
-      ))}
-    </MotionTag>
+        {by === "word" && i < units.length - 1 ? " " : ""}
+      </span>
+    )),
   );
 }
 
-/** Convenience wrapper: fade+rise a block of children when it scrolls in. */
+/**
+ * Content-block reveal. Emits the `.reveal` class (buttery fade-up +
+ * blur-sharpen); the single root-level IntersectionObserver (useScrollReveal)
+ * adds `.is-in` when it enters view -- immediately for content already on-screen
+ * at load/nav, so it can't stick or flicker. `delay` maps to a small stagger
+ * index for a gentle cascade when several sit together.
+ */
 export function Reveal({
   children,
   className = "",
@@ -116,19 +131,15 @@ export function Reveal({
   className?: string;
   delay?: number;
 }) {
-  const { reduce } = useMotionGate();
-  const { ref, inView } = useRevealInView();
-  if (reduce) return <div className={className}>{children}</div>;
-
+  // delay (seconds) -> a stagger index; keeps the old call sites working while
+  // driving the CSS cascade offset. Clamped so the range stays sensible.
+  const i = Math.min(6, Math.round(delay / 0.1));
   return (
-    <motion.div
-      ref={ref as Ref<HTMLDivElement>}
-      className={className}
-      initial={{ opacity: 0, y: 24 }}
-      animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
-      transition={{ duration: 0.7, ease: EASE_OUT, delay }}
+    <div
+      className={`reveal ${className}`.trim()}
+      style={{ "--reveal-i": i } as React.CSSProperties}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

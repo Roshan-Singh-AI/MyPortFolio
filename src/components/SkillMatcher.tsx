@@ -4,7 +4,7 @@ import { useDeferredValue, useId, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { SkillGroup } from "@/content/site";
 import { buildIndex, scoreAll } from "@/lib/retrieval";
-import { EASE_OUT, viewportOnce } from "@/lib/motion";
+import { EASE_OUT } from "@/lib/motion";
 
 /**
  * Semantic skill match -- an AI-driven recruiter tool on the About page.
@@ -154,7 +154,7 @@ export default function SkillMatcher({ groups }: { groups: SkillGroup[] }) {
 
       {/* Grouped chips -- dim non-matches and brighten matches while searching */}
       <div className="flex flex-col gap-8">
-        {groups.map((group, gi) => (
+        {groups.map((group) => (
           <div
             key={group.label}
             className="grid gap-3 border-t border-line pt-6 md:grid-cols-[10rem_1fr]"
@@ -162,27 +162,15 @@ export default function SkillMatcher({ groups }: { groups: SkillGroup[] }) {
             <h3 className="font-[family-name:var(--font-mono)] text-sm uppercase tracking-wider text-cyan">
               {group.label}
             </h3>
-            <motion.ul
-              initial="hidden"
-              whileInView="show"
-              viewport={viewportOnce}
-              variants={{
-                hidden: {},
-                show: { transition: { staggerChildren: 0.03, delayChildren: gi * 0.02 } },
-              }}
-              className="flex flex-wrap gap-2"
-            >
-              {group.items.map((item) => {
+            <ul className="reveal-stagger flex flex-wrap gap-2">
+              {group.items.map((item, ii) => {
                 const pct = scores.get(item) ?? 0;
                 const isMatch = active && pct > 0;
                 const dimmed = active && pct === 0;
                 return (
-                  <motion.li
+                  <li
                     key={item}
-                    variants={{
-                      hidden: reduce ? { opacity: 1 } : { opacity: 0, y: 10, scale: 0.96 },
-                      show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: EASE_OUT } },
-                    }}
+                    style={{ "--reveal-i": Math.min(ii, 8) } as React.CSSProperties}
                     className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-all duration-300 ${
                       isMatch
                         ? "border-cyan/60 bg-cyan/[0.1] text-text"
@@ -197,10 +185,10 @@ export default function SkillMatcher({ groups }: { groups: SkillGroup[] }) {
                         {pct}%
                       </span>
                     )}
-                  </motion.li>
+                  </li>
                 );
               })}
-            </motion.ul>
+            </ul>
           </div>
         ))}
       </div>

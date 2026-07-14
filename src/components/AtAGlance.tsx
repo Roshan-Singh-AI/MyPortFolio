@@ -1,11 +1,4 @@
-"use client";
-
-import { motion } from "framer-motion";
-import type { Ref } from "react";
 import { glanceStats, coreSkills } from "@/content/site";
-import { EASE_OUT } from "@/lib/motion";
-import { useMotionGate } from "@/lib/useMotionGate";
-import { useRevealInView } from "@/lib/useRevealInView";
 
 /**
  * "At a glance" -- the HR-scannable band, placed high on the home page so a
@@ -13,15 +6,10 @@ import { useRevealInView } from "@/lib/useRevealInView";
  *
  * A compact bento/stat strip of HONEST, traceable numbers (see site.ts:
  * glanceStats, each documenting its real source) plus a tight row of core
- * skill chips. Reveal-on-scroll, reduced-motion aware, stacks on mobile.
- * No invented figures -- every value maps to real content.
+ * skill chips. Reveal is pure CSS (`.reveal` / `.reveal-stagger`, view()
+ * timeline) -- no JS, visible by default, so it can't stick or flicker.
  */
 export default function AtAGlance() {
-  const { reduce } = useMotionGate();
-  // Sits high under the Hero; use an explicit in-view trigger (amount 0.35, as
-  // before) so an above-the-fold band reveals on mount rather than sticking.
-  const { ref, inView } = useRevealInView(0.35);
-
   return (
     <section
       className="mx-auto max-w-6xl px-5 pt-4 sm:px-8"
@@ -31,25 +19,14 @@ export default function AtAGlance() {
         At a glance
       </h2>
 
-      <motion.div
-        ref={ref as Ref<HTMLDivElement>}
-        initial={reduce ? false : "hidden"}
-        animate={reduce ? undefined : inView ? "show" : "hidden"}
-        variants={{
-          hidden: {},
-          show: { transition: { staggerChildren: reduce ? 0 : 0.06 } },
-        }}
-        className="rounded-3xl border border-line bg-[linear-gradient(160deg,rgba(127,183,154,0.06),rgba(173,201,179,0.05))] p-5 backdrop-blur-sm sm:p-7"
-      >
-        {/* Stat strip */}
+      {/* Instant, no reveal: this band sits high on the home page and must be
+          scannable the moment a recruiter lands -- reveals are reserved for
+          content you scroll to. */}
+      <div className="rounded-3xl border border-line bg-[linear-gradient(160deg,rgba(127,183,154,0.06),rgba(173,201,179,0.05))] p-5 backdrop-blur-sm sm:p-7">
         <ul className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-5">
           {glanceStats.map((stat) => (
-            <motion.li
+            <li
               key={stat.label}
-              variants={{
-                hidden: reduce ? { opacity: 1 } : { opacity: 0, y: 14 },
-                show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE_OUT } },
-              }}
               className="flex flex-col gap-1"
             >
               <span className="font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight text-gradient sm:text-3xl">
@@ -58,18 +35,12 @@ export default function AtAGlance() {
               <span className="text-[0.78rem] leading-snug text-text-dim">
                 {stat.label}
               </span>
-            </motion.li>
+            </li>
           ))}
         </ul>
 
         {/* Core skills row */}
-        <motion.div
-          variants={{
-            hidden: reduce ? { opacity: 1 } : { opacity: 0 },
-            show: { opacity: 1, transition: { duration: 0.4, ease: EASE_OUT } },
-          }}
-          className="mt-7 flex flex-wrap items-center gap-2 border-t border-line pt-6"
-        >
+        <div className="mt-7 flex flex-wrap items-center gap-2 border-t border-line pt-6">
           <span className="kicker mr-1 text-[0.58rem]">Core skills</span>
           {coreSkills.map((skill) => (
             <span
@@ -79,8 +50,8 @@ export default function AtAGlance() {
               {skill}
             </span>
           ))}
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </section>
   );
 }

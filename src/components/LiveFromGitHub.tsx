@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { EASE_OUT, staggerParent, riseItem, viewportOnce } from "@/lib/motion";
+import { EASE_OUT } from "@/lib/motion";
 import { useMounted } from "@/lib/useMounted";
 import AnswerMarkdown from "./AnswerMarkdown";
 
@@ -342,20 +342,14 @@ export default function LiveFromGitHub() {
         </p>
       ) : (
         <>
-          {/* Repo grid */}
-          <motion.ul
-            variants={reduce ? undefined : staggerParent}
-            initial={reduce ? false : "hidden"}
-            whileInView={reduce ? undefined : "show"}
-            viewport={viewportOnce}
-            className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            {repos.map((repo) => {
+          {/* Repo grid -- pure-CSS stagger reveal (view() timeline) */}
+          <ul className="reveal-stagger mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {repos.map((repo, ri) => {
               const active = study.repo === repo.name;
               return (
-                <motion.li
+                <li
                   key={repo.id}
-                  variants={reduce ? undefined : riseItem}
+                  style={{ "--reveal-i": Math.min(ri, 6) } as React.CSSProperties}
                   className="group relative flex h-full flex-col gap-3 overflow-hidden rounded-2xl border border-line bg-surface/40 p-5 transition-colors duration-500 hover:border-line-strong"
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -418,10 +412,10 @@ export default function LiveFromGitHub() {
                       </>
                     )}
                   </button>
-                </motion.li>
+                </li>
               );
             })}
-          </motion.ul>
+          </ul>
 
           {/* Streamed case study */}
           <AnimatePresence mode="wait">

@@ -167,6 +167,98 @@ body {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Scroll reveal -- native CSS scroll-driven animation                */
+/* ------------------------------------------------------------------ */
+/*  A fresh, JS-free reveal system (replaces the old framer/observer    */
+/*  machinery that flickered, stuck-until-scroll, and janked).           */
+/*                                                                       */
+/*  How it can't break, by construction:                                 */
+/*   - Content is VISIBLE BY DEFAULT (`.reveal` has no hidden base       */
+/*     style). If scroll-timeline is unsupported or JS/CSS is slow, you  */
+/*     see the content -- never a blank or a stuck-hidden element.       */
+/*   - The reveal runs ONLY inside `@supports (animation-timeline: view())`*/
+/*     and drives `opacity/transform/filter` on the compositor thread    */
+/*     (60fps, no main-thread jank, no observer to mis-fire).            */
+/*   - `animation-fill-mode: both` + `animation-range` means an element  */
+/*     already in view on load is simply at its end state -- no entrance */
+/*     replay on client-side navigation (the old flicker source).        */
+/*                                                                       */
+/*  Signature motion: a buttery fade-up with a slight blur->sharp pull   */
+/*  (premium/Linear feel). One motion language site-wide.                */
+
+/*  Mechanism: a single IntersectionObserver (see useScrollReveal, mounted once
+    in the root layout) adds `.is-in` to each `.reveal` element the first time it
+    intersects the viewport. Because an observer fires immediately for elements
+    already on-screen, everything visible at load OR after a client-side nav gets
+    `.is-in` right away (never stuck), and the motion is a plain CSS TRANSITION
+    (not per-render framer state), so it can't flicker. Below-fold content
+    transitions in as you scroll to it.
+
+    Signature motion: buttery fade-up with a slight blur->sharp pull. */
+
+/*  VISIBLE BY DEFAULT -- no pre-paint script, no CSS hidden base. Content is
+    always readable if JS is off / slow / reduced-motion, and there is nothing
+    to flash or get stuck. The JS driver (useScrollReveal) adds `.reveal-armed`
+    ONLY to elements that are below the fold at observe-time; that class sets the
+    hidden start state, and the observer then adds `.is-in` to transition them
+    in as they scroll into view. Above-the-fold content is never armed -> shows
+    instantly. All motion is a plain CSS transition (no framer, no flicker). */
+
+.reveal {
+  transition:
+    opacity 0.7s var(--ease-out),
+    transform 0.7s var(--ease-out),
+    filter 0.7s var(--ease-out);
+  transition-delay: calc(var(--reveal-i, 0) * 70ms);
+}
+.reveal.reveal-armed {
+  opacity: 0;
+  transform: translateY(24px);
+  filter: blur(6px);
+  will-change: opacity, transform;
+}
+.reveal.reveal-armed.is-in {
+  opacity: 1;
+  transform: none;
+  filter: blur(0);
+}
+
+/* Stagger container: each child fades up with a cascading delay. */
+.reveal-stagger.reveal-armed > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.6s var(--ease-out),
+    transform 0.6s var(--ease-out);
+  transition-delay: calc(var(--reveal-i, 0) * 55ms);
+}
+.reveal-stagger.reveal-armed.is-in > * {
+  opacity: 1;
+  transform: none;
+}
+
+/* Masked word-rise for headings. The clip structure is always present; the rise
+   transform only applies once armed (below-fold heading), cleared on .is-in. */
+.reveal-word-clip {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+.reveal-word-clip > span {
+  display: inline-block;
+}
+.reveal-words.reveal-armed .reveal-word-clip > span {
+  transform: translateY(110%);
+  transition: transform 0.6s var(--ease-out);
+  transition-delay: calc(var(--reveal-i, 0) * 45ms);
+}
+.reveal-words.reveal-armed.is-in .reveal-word-clip > span {
+  transform: translateY(0);
+}
+
+/* ------------------------------------------------------------------ */
 /*  Reduced motion                                                     */
 /* ------------------------------------------------------------------ */
 @media (prefers-reduced-motion: reduce) {
